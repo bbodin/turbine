@@ -16,6 +16,9 @@ Requirements
  * networkx-1.8.1
  * python-glpk-0.4.43
 
+ On Fedora 17+, you can install networkx by using `yum install networkx -y`.
+python-glpk can be found here http://www.dcc.fc.up.pt/~jpp/code/python-glpk/.
+
 Usage
 =======
 
