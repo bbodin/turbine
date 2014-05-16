@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Turbine : Dataflow Graph Generator" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Turbine</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/bbodin/turbine">View on GitHub</a>
+
+          <h1 id="project_title">Turbine</h1>
+          <h2 id="project_tagline">Dataflow Graph Generator</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/bbodin/turbine/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/bbodin/turbine/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Turbine is a Dataflow graph generator. 
+It can generate SDFs, CSDFs and PCGs with initilization phases. All the graphs can be saved in the SDF3 XML format (a particular notation is considered for threshold and initilization phases).</p>
+
+<h1>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
+
+<p>TBA</p>
+
+<h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<ul>
+<li>networkx-1.8.1</li>
+<li>
+<p>python-glpk-0.4.43</p>
+
+<p>On Fedora 17+, you can install networkx by using <code>yum install networkx -y</code>.
+python-glpk can be found here <a href="http://www.dcc.fc.up.pt/%7Ejpp/code/python-glpk/">http://www.dcc.fc.up.pt/~jpp/code/python-glpk/</a>.</p>
+</li>
+</ul><h1>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h1>
+
+<h2>
+<a name="how-to-generate-a-dataflow-using-python" class="anchor" href="#how-to-generate-a-dataflow-using-python"><span class="octicon octicon-link"></span></a>How to generate a dataflow using Python</h2>
+
+<pre><code>import turbine
+graph = generate(taskCount)
+write_sdf3_file(graph)
+
+</code></pre>
+
+<p>Then a SDF3 XML file <code>sortie.sdf3</code> will be created in current directory.
+To change the filename, you can use  <code>write_sdf3_file(graph, fileName = "fileName")</code>.</p>
+
+<h2>
+<a name="how-to-see-the-generated-linear-program-used-to-compute-the-inital-marking" class="anchor" href="#how-to-see-the-generated-linear-program-used-to-compute-the-inital-marking"><span class="octicon octicon-link"></span></a>How to see the generated linear program used to compute the inital marking</h2>
+
+<pre><code>generate(taskCount, writePL = True)
+</code></pre>
+
+<p>A <code>preload.pl</code> file will be created in current directory.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Turbine maintained by <a href="https://github.com/bbodin">bbodin</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
