@@ -14,7 +14,7 @@ class Normalized :
         self.graph = graph
         self.coefVector = None
 
-    def getGraphUnNorm(self, graph, coefVector):
+    def getGraphUnNorm(self, graph, coefVector = None):
         """Un-normalize according to a coefficient vector.
         
         Return
@@ -24,6 +24,12 @@ class Normalized :
         if not graph.isNormalized():
             return graph
         
+        if coefVector == None:
+            if self.coefVector == None :
+                print self.graph.getName()
+                return
+            coefVector = self.coefVector
+
         un_graph = copy.deepcopy(graph)
         for arc in self.graph.getArcList():
             coef = coefVector[arc]
@@ -54,11 +60,12 @@ class Normalized :
         """
         if self.graph.isNormalized():
             return self.graph
-        
+
+        self.getVectorNorm()
+
         n_graph = copy.deepcopy(self.graph)
         n_graph.setName(n_graph.getName()+"_norm")
 
-        self.getVectorNorm()
         
         for arc in self.graph.getArcList():
             coef = self.coefVector[arc]

@@ -1,5 +1,7 @@
 """Interface between networkx and the generator.
 """
+from algorithms.normalized import Normalized
+from generation.markingComputation import generateInitialMarking
 import logging
 
 from gcd import gcdList
@@ -145,13 +147,20 @@ class Graph :
         new_task = self.taskKey
         if name == None :
             name = "t"+str(new_task)
-        if self.setTaskName(new_task,name) != name :
-            return None
+
+        try :#Detect if a task with the same name exist
+            self.getTaskByName(name)
+            logging.error("Name already used by another task")
+            return None#If it is the case the present task is not add.
+        except KeyError :
+            pass
 
         self.taskKey+=1
         self.taskByName[name] = new_task
 
         self.nxg.add_node(new_task)
+        self.setTaskName(new_task,name)
+
         self.nxg.node[new_task][self.CONST_TASK_PHASE_DURATION_LIST] = [1]
         self.nxg.node[new_task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST] = []
 
@@ -164,16 +173,7 @@ class Graph :
         ----------
         task : the task targeted.
         name : the name of the task.
-
-        Note that if the name is already used, they will be no modification.
         """
-        try :
-            if self.getTaskByName(name) != task :
-                logging.error("Name already used by another task")
-                return
-        except KeyError :
-            pass
-        
         self.nxg.node[task][self.CONST_TASK_NAME] = name
         return name
 
@@ -648,6 +648,33 @@ class Graph :
                 return "SDFG"
             return "CSDFG"
         return "PCG"
+    
+    def getNormalizedGraph(self):
+        if self.isNormalized():
+            logging.error("Graph already normalized !")
+            return self
+        if 'nor' not in self.__dict__:
+            self.nor = Normalized(self)
+        return self.nor.getGraphNorm()
+    
+    def getUnNormalizedGraph(self, vector = None):
+        if not self.isNormalized():
+            logging.error("Graph already un-normalized !")
+            return self
+        if 'nor' not in self.__dict__:
+            if vector == None :
+                logging.error("You must specified a vector for un-normalize !")
+                return
+            else :
+                self.nor = Normalized(self)
+                return self.nor.getGraphUnNorm(self, vector)
+        if vector != None :
+            return self.nor.getGraphUnNorm(self, vector)
+        return self.nor.getGraphUnNorm(self)
+    
+    def computeInitialMarking(self, solver = "auto", GLPKVerbose = False, LPFileName = None):
+        generateInitialMarking(self,solver = solver, GLPKVerbose=GLPKVerbose, LPFileName=LPFileName)
+
 
 ########################################################################
 #                            getter task                               #
