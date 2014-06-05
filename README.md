@@ -1,11 +1,16 @@
 
 Turbine is a Dataflow graph generator. 
-It can generate SDFs, CSDFs and PCGs with initilization phases. All the graphs can be saved in the SDF3 XML format (a particular notation is considered for threshold and initilization phases).
+It can generate SDFGs, CSDFGs and PCGs with initilization phases. All the graphs can be saved in the SDF3 XML format (a particular notation is considered for threshold and initilization phases).
 
 Features
 =======
 
-TBA
+ * Generate SDFG/CSDFG/PCG up to 10,000 actors (~10m for SDFG, ~2h for CSDFG/PCG).
+ * Normalize/denormalize dataflow graph.
+ * Compute initial marking.
+ * Compute symbolic execution of dataflow graphs.
+ * Generate .sdf3 xml files (see SDF3 generator)
+ * Generate .tur files (10 times smaller than sdf3 files and easy to write by hand)
 
 Installation
 =======
