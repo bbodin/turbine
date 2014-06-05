@@ -1,6 +1,7 @@
 """Interface between networkx and the generator.
 """
 from algorithms.normalized import Normalized
+from algorithms.symbolic_exe import SymbolicExe
 from generation.markingComputation import generateInitialMarking
 import logging
 
@@ -662,19 +663,26 @@ class Graph :
             logging.error("Graph already un-normalized !")
             return self
         if 'nor' not in self.__dict__:
+            self.nor = Normalized(self)
             if vector == None :
-                logging.error("You must specified a vector for un-normalize !")
-                return
-            else :
-                self.nor = Normalized(self)
-                return self.nor.getGraphUnNorm(self, vector)
-        if vector != None :
-            return self.nor.getGraphUnNorm(self, vector)
-        return self.nor.getGraphUnNorm(self)
+                vector = self.nor.getvectorUnNorm()
+        return self.nor.getGraphUnNorm(self, vector)
     
     def computeInitialMarking(self, solver = "auto", GLPKVerbose = False, LPFileName = None):
         generateInitialMarking(self,solver = solver, GLPKVerbose=GLPKVerbose, LPFileName=LPFileName)
 
+    def clearInitialMarking(self):
+        for arc in self.getArcList():
+            self.setInitialMarking(arc, 0)
+            
+    def symbolicExecution(self):
+        exe = SymbolicExe(self)
+        if exe.execute() == 0:
+            print "Symbolic execution succeed"
+            logging.info("Symbolic execution succeed")
+        else:
+            print "Symbolic execution failed"
+            logging.info("Symbolic execution failed")
 
 ########################################################################
 #                            getter task                               #

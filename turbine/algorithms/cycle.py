@@ -6,7 +6,7 @@ from random import *
 def isContainsCycle(graph):
 
     visited = set()
-  
+
     for task in graph.getTaskList() :
         if task not in visited :
             #print "begin new task %s" % (task)
@@ -55,7 +55,7 @@ def getArcInCycle(graph):
                 else :                    
                     #print "already visit %s" % (v)
                     raise ValueError
-#                     return graph.getArcList(source = v, target = v)[0]
+                    #return graph.getArcList(source = v, target = v)[0]
                 for vw in graph.getArcList(source = v):
                     w = graph.getTarget(vw) 
                     if w not in cvisited:
@@ -86,7 +86,7 @@ def getArcInEmptyCycle(graph):
                 else :                    
                     #print "already visit %s" % (v)
                     raise ValueError
-#                     return graph.getArcList(source = v, target = v)[0]
+                    #return graph.getArcList(source = v, target = v)[0]
                 for vw in graph.getArcList(source = v):
                     if graph.getInitialMarking(vw) != 0 : 
                         continue

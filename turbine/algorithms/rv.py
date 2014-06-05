@@ -7,13 +7,12 @@ from models.lcm import *
 def calcFractionsConnectedActors(g,fractions,a,ratePeriod) :
     """This class is used to compute repetition vector of a graph.
     """
-    
-    
+
     fractionA = fractions[a]
 
     if fractionA == Fraction(0,1) :
         return False
-    
+
     for c in g.getArcList(source=a) + g.getArcList(target=a) :
         src  = g.getSource(c)
         dest = g.getTarget(c)

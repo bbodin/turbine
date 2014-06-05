@@ -15,8 +15,8 @@ def generateGraph(graphName, c_param):
     """Step 1
     """
     graph = Graph(graphName)
-    __generateConnexGraph(graph,c_param)
-    __generateArcs(graph,c_param)
+    __generateConnexGraph(graph,c_param)#Generate a Tree graph
+    __generateArcs(graph,c_param)#Add arcs to the Tree graph
     return graph
 
 

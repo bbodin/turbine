@@ -4,7 +4,7 @@ import logging
 
 class SolverSC2 :
 
-    def __init__(self, graph, verbose = False, LPFileName = None) :
+    def __init__(self, graph, verbose, LPFileName) :
         self.graph = graph
         self.verbose = verbose
         self.LPFileName = LPFileName

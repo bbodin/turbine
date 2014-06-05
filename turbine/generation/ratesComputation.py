@@ -1,15 +1,24 @@
 from math import floor
-from models.gcd import *
-from models.gcd import gcdList
-from models.lcm import *
-from random import *
+from models.gcd import gcdList, gcd
+from models.lcm import lcm
+from random import shuffle, random, sample, randint
 import logging
+
+
+class Error(Exception):
+    pass
+error = Error   # backward compatibility
 
 def constrained_sum_sample_pos(n, total):
     """Return a randomly chosen list of n positive integers summing to total.
     Each such list is equally likely to occur.
-    CF : http://stackoverflow.com/questions/3589214/generate-multiple-random-numbers-to-equal-a-value-in-python
+
+    Parameters
+    ----------
+    n : The size of the random list return.
+    total : The sum of the list return
     """
+
     if total < n :
         x = [0]*(n-total)+[1]*total
         shuffle(x)
@@ -32,43 +41,43 @@ def constrained_sum_sample_pos(n, total):
 #                           generate weight                            #
 ########################################################################
 def generateWeight(graph,c_param):
-    """Step 2
+    """The weight generation step of the generator (step 2)
     """
-    __generateRV(graph,c_param)
-    __generatePhaseLists(graph,c_param)
+    __generateRV(graph,c_param)#generate the repetition vector
+    __generatePhaseLists(graph,c_param)#generate weight vectors
     if c_param.isInitialized():
-        __generateInitialPhaseLists(graph,c_param)
+        __generateInitialPhaseLists(graph,c_param)#generate initial vectors
 
 def __generateRV(graph, c_param):
+    """Generate the vector of repetition factor RV with gcd(RV) = 1 and SUM(RV)=sumRV
+    """
     logging.info("Generate repetition vector")
-    sumRV = c_param.getAverageRepetitionFactor()*graph.getTaskCount() #Somme du vecteur de repetition voulue
+    sumRV = c_param.getAverageRepetitionFactor()*graph.getTaskCount() #Sum of the repetition vector
 
-    #On tire le premier des facteur de repetition
-    RV = randint(1,2*c_param.getAverageRepetitionFactor()-1)
-    RVList = [RV]
-    RVTot = RV
-    gcdValue = RV
-
-    #On tire le reste des facteur de repetition 
-    for i in xrange(1, graph.getTaskCount()):
+    RVList = []
+    RVTot = 0
+    gcdValue = 0
+    #Repetition factor are randomly selected 
+    for i in xrange(0, graph.getTaskCount()):
         #~ RV = gaussRandomSelection(1,2*c_param.getAverageRepetitionFactor()-1)
         RV = randint(1,2*c_param.getAverageRepetitionFactor()-1)
         gcdValue = gcd(gcdValue,RV)
         RVList.append(RV)
         RVTot +=  RV
 
-    #On reajuste la liste pour obtenir une somme egal a sumRV
+    #If a problem occurred the list is readjusted
     if RVTot > sumRV :
         for i in xrange(0, RVTot-sumRV):
             if RVList[i%graph.getTaskCount()] > 1 :
                 RVList[i%graph.getTaskCount()]-=1
                 RVTot-=1
     else :
+        #The program should never go here or your sum of the repetition vector is too small
         for i in xrange(0, sumRV-RVTot):
             RVList[i%graph.getTaskCount()]+=1
             RVTot+=1
 
-    #Modifie les deux derniers elements de la liste pour avoir un pgcd a 1
+    #Modify the two last integers of the list to get a gcd equal to 1
     if gcdValue != 1 :
         logging.info("recalculate GCD")
         while gcdList([gcdValue,RVList[-1],RVList[-2]]) != 1:
@@ -82,6 +91,8 @@ def __generateRV(graph, c_param):
     return
 
 def __generatePhaseLists(graph, c_param):    
+    """Generate weights of the dataflow.
+    """
     logging.info("Generate task phase lists")
     k = 0
 
@@ -96,7 +107,7 @@ def __generatePhaseLists(graph, c_param):
         if Zi == 0:
             logging.fatal("lcmValue"+str(lcmValue))
             logging.fatal("null rate when generating, this error should never occur...")
-            raise GenerationError("__generatePhaseLists","null rate when generating, this error should never occur...")
+            raise Error("__generatePhaseLists","null rate when generating, this error should never occur...")
 
         phaseDurationList = constrained_sum_sample_pos(phaseCount,randint(1,c_param.getAverageTime()*phaseCount*2-1))
 
@@ -110,7 +121,8 @@ def __generatePhaseLists(graph, c_param):
                 print graph.getProdList(arc)
                 print Zi
                 logging.fatal("constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
-                raise GenerationError("__generatePhaseLists","constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
+                raise Error("__generatePhaseLists","constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
+            
         for arc in graph.getArcList(target = task) :
             consList = constrained_sum_sample_pos(phaseCount,Zi)
             graph.setConsList(arc, consList)
@@ -119,15 +131,15 @@ def __generatePhaseLists(graph, c_param):
                 graph.setConsThresholdList(arc, consThresholdList)
             if sum(graph.getConsList(arc)) != Zi :
                 logging.fatal("constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
-                raise GenerationError("__generatePhaseLists","constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
+                raise Error("__generatePhaseLists","constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
 
         if graph.getTaskCount() > 1000 and k%1000 == 0 :
             logging.info(str(k)+"/"+str(graph.getTaskCount())+" tasks weigth generation complete.")
         k+=1 
-    #~ print "phaseDurationList computation in "+str(datetime.timedelta(seconds=time.time()-start))
-
 
 def __generateInitialPhaseLists(graph, c_param):
+    """Generate initial weights of the dataflow.
+    """
     if (c_param.isInitialized() == False) or (c_param.getMaxPhaseCountInit() == 0) : # TODO : fix temporaire
 
         for task in graph.getTaskList() :

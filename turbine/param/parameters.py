@@ -1,5 +1,9 @@
 import logging
 
+class Error(Exception):
+    pass
+error = Error   # backward compatibility
+
 class Parameters :
     """This class contains all options for generate dataflow graph
     """
@@ -52,8 +56,6 @@ class Parameters :
         self.__SOLVER = "auto"
         
         #~~~~~~~~~~~~~~~~~~~~~PRINT~OPTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        self.__VERBOSE_G = False
-        self.__VERBOSE_SOLVER = False
         self.__VERBOSE_GLPK = False
         self.__LOGGING_LEVEL = logging.ERROR
         #The file name where the ILP of the initial marking's solver will be write
@@ -71,7 +73,7 @@ class Parameters :
         """
         self.__verifyInteger(value)
         if value < 2 :
-            raise ParametersError("Wrong value : it must be greater than 1")
+            raise Error("Wrong value : it must be greater than 1")
         self.__NB_TASK = int(value)
 
     def setMinArcsCount(self, value):
@@ -297,6 +299,6 @@ class Parameters :
     
     def __verifyInteger(self,value):
         if int(value) < 0 :
-            raise ParametersError("Wrong value : it must be positive")
+            raise Error("Wrong value : it must be positive")
 
     
