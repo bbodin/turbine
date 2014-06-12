@@ -19,10 +19,12 @@ Requirements
 -------
 
  * networkx-1.8.1
+ * glpk 4.48 
  * python-glpk-0.4.43
 
  On Fedora 17+, you can install networkx by using `yum install networkx -y`.
-python-glpk can be found here http://www.dcc.fc.up.pt/~jpp/code/python-glpk/.
+Instructions to install python-glpk can be found here http://en.wikibooks.org/wiki/GLPK/Python.
+glpk is available at http://ftp.gnu.org/gnu/glpk/.
 
 Usage
 =======
@@ -32,20 +34,27 @@ How to generate a dataflow using Python
 
 ```
 import turbine
-graph = generate(taskCount)
-write_sdf3_file(graph)
+
+param= param.parameters.Parameters()
+param.setNbTask(100)
+
+graph = generate(param)
+write_sdf3_file(graph, fileName = "fileName.sdf3")
 
 ```
 
-Then a SDF3 XML file `sortie.sdf3` will be created in current directory.
-To change the filename, you can use  `write_sdf3_file(graph, fileName = "fileName")`.
+Then a SDF3 XML file `fileName.sdf3` will be created in current directory.
 
 How to see the generated linear program used to compute the inital marking
 --------
 
 ```
-generate(taskCount, writePL = True)
+param= param.parameters.Parameters()
+param.setNbTask(100)
+param.setLPFileName(test.lp)
+
+generate(param)
 ```
 
-A `preload.pl` file will be created in current directory.
+A `test.pl` file will be created in current directory.
 
