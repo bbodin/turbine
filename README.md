@@ -19,7 +19,7 @@ Requirements
 -------
 
  * networkx-1.8.1
- * glpk 4.48 
+ * glpk 4.48
  * python-glpk-0.4.43
 
  On Fedora 17+, you can install networkx by using `yum install networkx -y`.
@@ -57,4 +57,6 @@ generate(param)
 ```
 
 A `test.pl` file will be created in current directory.
+
+Several examples are avalaible in 'turbine/examples'.
 
