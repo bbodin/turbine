@@ -28,16 +28,16 @@ class SolverSC1 :
         glp_set_obj_dir(self.prob, GLP_MIN)
 
         #GLPK parameters :
-        self.parm = glp_smcp()
-        glp_init_smcp(self.parm)#Do it before modify parameters
+        self.glpkParam = glp_smcp()
+        glp_init_smcp(self.glpkParam)#Do it before modify parameters
         
-        self.parm.presolve = GLP_ON
-        self.parm.msg_lev = GLP_MSG_ALL
+        self.glpkParam.presolve = GLP_ON
+        self.glpkParam.msg_lev = GLP_MSG_ALL
         if not self.verbose :
-            self.parm.msg_lev = GLP_MSG_ERR;
-        self.parm.meth = GLP_DUALP
-        self.parm.out_frq = 2000#consol print frequency
-        #~ self.parm.tm_lim =300000#time limit in millisecond (5min)
+            self.glpkParam.msg_lev = GLP_MSG_ERR;
+        self.glpkParam.meth = GLP_DUALP
+        self.glpkParam.out_frq = 2000#consol print frequency
+        #~ self.glpkParam.tm_lim =300000#time limit in millisecond (5min)
 
     def __createCol(self):#Add Col on prob
         #Counting column
@@ -128,11 +128,11 @@ class SolverSC1 :
                 if self.graph.isThresholded():
                     thresholdList = self.__getThresholdList(arc)
                 step = self.graph.getGcd(arc)
-                
+
                 predOut = 0
                 for sourcePhase in xrange(rangeSource):#source/prod/out normaux
                     if sourcePhase > 0 : predOut +=prodList[sourcePhase-1]
-                    
+
                     predIn = 0
                     In = 0
                     for targetPhase in xrange(rangeTarget):#target/cons/in normaux
@@ -159,7 +159,7 @@ class SolverSC1 :
             logging.info("Writing problem : "+str(problemLocation)) 
 
         logging.info("solving problem ...")
-        ret = str(glp_simplex(self.prob, self.parm))
+        ret = str(glp_simplex(self.prob, self.glpkParam))
         logging.info("Solver return : "+ret)
 
         if logging.getLogger().getEffectiveLevel() == logging.DEBUG :
@@ -237,7 +237,7 @@ class SolverSC1 :
         self.varCoef[self.k] = 1.0
         self.k+=1
 
-        glp_set_row_bnds(self.prob, row, GLP_LO, W1+1, 0.0)#W1+1 cause there is no strict bound with GLPK
+        glp_set_row_bnds(self.prob, row, GLP_LO, W1+0.000000001, 0.0)#W1+1 cause there is no strict bound with GLPK
         glp_set_row_name(self.prob, row, "r_"+str(row))
 
     #Add a constraint : FM0*step = M0

@@ -19,7 +19,6 @@ def generateGraph(graphName, c_param):
     __generateArcs(graph,c_param)#Add arcs to the Tree graph
     return graph
 
-
 def __generateConnexGraph(graph,c_param):
     logging.info("Generate connex graph")
     graph.addTask()

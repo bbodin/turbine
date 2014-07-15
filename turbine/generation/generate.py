@@ -28,3 +28,4 @@ def generate(graphName = "generated_graph", c_param = None):
     generateInitialMarking(graph, solver = c_param.getSolver(), GLPKVerbose = c_param.isGLPKVerbose(), LPFileName = c_param.getLPFileName())
     logging.info("Generating done : "+str(time.time() - start)+"s")
     return graph
+

@@ -1,6 +1,8 @@
 from fractions import Fraction
 from generation.generate import generate
 from models.lcm import *
+import sys
+sys.setrecursionlimit(10000) # 10000 is an example, try with different values
 
 
 

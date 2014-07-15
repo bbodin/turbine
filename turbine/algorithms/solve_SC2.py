@@ -28,13 +28,13 @@ class SolverSC2 :
         glp_set_obj_dir(self.prob, GLP_MIN)
 
         #GLPK parameters :
-        self.parm = glp_smcp()
-        glp_init_smcp(self.parm)
-        self.parm.presolve = GLP_ON
+        self.glpkParam = glp_smcp()
+        glp_init_smcp(self.glpkParam)
+        self.glpkParam.presolve = GLP_ON
         if not self.verbose :
-            self.parm.msg_lev = GLP_MSG_ERR;
-        self.parm.meth = GLP_DUALP
-        self.parm.out_frq = 2000
+            self.glpkParam.msg_lev = GLP_MSG_ERR;
+        self.glpkParam.meth = GLP_DUALP
+        self.glpkParam.out_frq = 2000
 
     def __createCol(self):#Add Col on prob
         #Counting column
@@ -121,7 +121,7 @@ class SolverSC2 :
             logging.info("Writing problem : "+str(problemLocation)) 
 
         logging.info("solving problem ...") 
-        ret = str(glp_simplex(self.prob, self.parm))
+        ret = str(glp_simplex(self.prob, self.glpkParam))
         logging.info("Solveur return : "+ret) 
 
         self.Z = glp_get_obj_val(self.prob)
@@ -188,7 +188,7 @@ class SolverSC2 :
         self.varCoef[self.k] = 1.0
         self.k+=1
 
-        glp_set_row_bnds(self.prob, row, GLP_LO, W2+1, 0.0)#W2+1 cause there is no strict bound with GLPK
+        glp_set_row_bnds(self.prob, row, GLP_LO, W2+0.000000001, 0.0)#W2+1 cause there is no strict bound with GLPK
         glp_set_row_name(self.prob, row, "r_"+str(row))
 
     #Add a constraint : FM0*step = M0

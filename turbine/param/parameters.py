@@ -193,7 +193,7 @@ class Parameters :
         """Set the file name where the ILP of the initial marking's solver will be write
         None value By default (it will write nothing)
         """
-        self.__LP_FILENAME =  bool(value)
+        self.__LP_FILENAME =  value
 
 ########################################################################
 #                           GETTERS                                    #

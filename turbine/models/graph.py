@@ -18,8 +18,6 @@ class Graph :
     CONST_GRAPH_PHASED = "phas"
     CONST_GRAPH_THRESHOLD = "thre"
     CONST_GRAPH_INITIALIZED = "init"
-    CONST_GRAPH_REENTRANT = "reent"
-    CONST_GRAPH_MULTIGRAPH = "multi"
 
 #--------------------------Task----------------------------------------#
     CONST_TASK_NAME = "tName"
@@ -63,8 +61,6 @@ class Graph :
         self.__setPhased(False)
         self.__setThreshold(False)
         self.__setInitialized(False)
-        self.__setReEntrant(False)
-        self.__setMultigraph(False)
         
         self.taskKey = 0
 
@@ -74,6 +70,43 @@ class Graph :
     def __str__( self ) :
         s = "Graph name : " + self.nxg.graph[self.CONST_GRAPH_NAME] +"\n"
         return s
+    
+    def setNx(self, nx):
+
+        self.nxg = nx
+
+        self.__setPhased(False)
+        self.__setThreshold(False)
+        self.__setInitialized(False)
+        self.__setReEntrant(False)
+        self.__setMultigraph(False)
+
+        self.taskByName = {}
+        self.arcByName = {}
+
+        for task in self.getTaskList():
+            if self.getPhaseCount(task) > 1 :
+                self.__setPhased(True)
+            if self.getPhaseCountInit(task) > 0 :
+                self.__setInitialized(True)
+            self.taskByName[self.nxg.node[task][self.CONST_TASK_NAME]] = task
+
+        for arc in self.getArcList():
+            try:
+                if len(self.__getArcAttribute(arc, self.CONST_ARC_CONS_THRESOLD_LIST)) > 0 :
+                    self.__setThreshold(True)
+            except KeyError:
+                pass
+            try:
+                if len(self.__getArcAttribute(arc, self.CONST_ARC_INI_CONS_THRESOLD_LIST)) > 0 :
+                    self.__setThreshold(True)
+            except KeyError:
+                pass
+
+            if self.getSource(arc) == self.getTarget(arc):
+                self.__setReEntrant(True)
+            if len(self.getArcList(source=self.getSource(arc), target=self.getTarget(arc)))>1 :
+                self.__setMultigraph(True)
 
     def drawit(self):
         nx.draw_shell(self.nxg)
@@ -89,15 +122,6 @@ class Graph :
         name : the name of the graph.
         """      
         self.nxg.graph[self.CONST_GRAPH_NAME] = name
-
-    def __setReEntrant(self, param):
-        """Set the graph as reentrant.
-
-        Parameters
-        ----------
-        param : a boolean.
-        """
-        self.nxg.graph[self.CONST_GRAPH_REENTRANT] = param
 
     def __setThreshold(self, param):
         """Set the graph as thresholded.
@@ -125,15 +149,6 @@ class Graph :
         param : a boolean.
         """
         self.nxg.graph[self.CONST_GRAPH_PHASED] = param
-        
-    def __setMultigraph(self, param):
-        """Set the graph as multigraph.
-
-        Parameters
-        ----------
-        param : a boolean.
-        """
-        self.nxg.graph[self.CONST_GRAPH_MULTIGRAPH] = param
 
 ########################################################################
 #                           add/modify task                            #
@@ -322,15 +337,9 @@ class Graph :
         the tuple (source,target, key).
         """
 
-        if len(self.getArcList(source=source, target=target))>0 :
-            self.__setMultigraph(True)
-
         self.nxg.add_edge(source, target)
         key = self.nxg.edge[source][target].items()[-1][0]
         arc = (source,target,key)
-
-        if self.isArcReEntrant(arc):
-            self.__setReEntrant(True)
 
         self.setInitialMarking(arc,0)
         self.setTokenSize(arc,1)
@@ -606,11 +615,6 @@ class Graph :
 ########################################################################
 #                            getter graph                              #
 ########################################################################
-    def isReEntrant(self):
-        """Return True if the graph have reentrant edges.
-        """
-        return self.nxg.graph[self.CONST_GRAPH_REENTRANT]
-
     def getTaskCount(self):
         """Return the number of task of the graph.
         """
@@ -1032,7 +1036,7 @@ class Graph :
                     result+=str(int(self.getConsInitList(arc)[i]))+","
         if (len(result) > 0) :
             result = result[0:-1]+";"#del the last comma
-        for i in range(0, self.getPhaseCount(arc[1])) :     
+        for i in range(0, self.getPhaseCount(arc[1])) :
             if self.isThresholded() and  len(self.getConsThresholdList(arc)) > 0 and self.getConsList(arc)[i] != self.getConsThresholdList(arc)[i] :
                 result+=str(int(self.getConsList(arc)[i]))+":"+str(int(self.getConsThresholdList(arc)[i]))+","
             else :
@@ -1099,7 +1103,7 @@ class Graph :
         if self.isThresholded() :
             return self.__getArcAttribute(arc, self.CONST_ARC_CONS_THRESOLD_LIST)
         else :
-            return self.getConsList(arc)
+            return []
 
     def getConsInitThresholdList(self, arc):
         """Return the initial threshold rate vector of the arc. 
@@ -1252,7 +1256,7 @@ class Graph :
         phasesMoy = phasesTot/self.getTaskCount()
 
         print "Graph : "+str(self.getName())+", Type : "+str(self.getGraphType())
-        print "Normalized : "+str(self.isNormalized())+", Multigraph : "+str(self.isMultiGraph())+", reentrant : "+str(self.isReEntrant())
+        print "Normalized : "+str(self.isNormalized())+", Multigraph : "+str(self.isMultigraph())+", reentrant : "+str(self.isReentrant())
         print "Number of tasks : "+str(self.getTaskCount())
         print "Number of edges : "+str(self.getArcCount())
         print "Task incoming degree tot: "+str(degreeInTot)+", moy : "+str(degreeInMoy)
@@ -1272,7 +1276,7 @@ class Graph :
     def isCyclic(self) :
         """Return true if the graph has cycle (reentrant arcs are not considerate as cycle).
         """
-        return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1
+        return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1 or self.isReEntrant()
 
     def strTask(self, task):
         """Return a string which represent a task.
@@ -1323,9 +1327,25 @@ class Graph :
         for arc in self.getArcList():
             print str(arc)+" M0:"+str(self.getInitialMarking(arc))
 
+    def isMultigraph(self):
+        for arc in self.getArcList():
+            source, target, key = arc
+            if len(self.getArcList(source = source, target = target)) > 1:
+                return True
+        return False
+
+    def isReentrant(self):
+        for arc in self.getArcList():
+            if self.isArcReEntrant(arc):
+                return True
+        return False
+    
     def isNormalized(self):
         """Return True if the graph is normalized.
         """
+        
+        if len(self.getTaskList()) == 1 :
+            return True
         for task in self.getTaskList() :
             if len(self.getOutputArcList(task)) > 0:
                 refValue = sum(self.getProdList(self.getOutputArcList(task)[0]))
@@ -1339,11 +1359,6 @@ class Graph :
                 if sum(self.getConsList(arc)) !=  refValue :
                     return False 
         return True
-
-    def isMultiGraph(self):
-        """Return True if the graph is has multi arc (ie more than one arc for a couple of tasks).
-        """
-        return self.nxg.graph[self.CONST_GRAPH_MULTIGRAPH]
 
     def isConsistent(self):
         """Return True if the graph is consistent.
