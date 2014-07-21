@@ -38,7 +38,7 @@ def generateInitialMarking(graph, solver = "auto", GLPKVerbose = False, LPFileNa
         return
 
     solver.generateInitialMarking()
-    M0tot = __calcReEntrantTest(graph)
+    M0tot = __calcReEntrant(graph)
     logging.info("Mem tot (reentrant) : "+str(M0tot))
     
 
@@ -87,7 +87,7 @@ def __calcReEntrantPreload(graph):
             logging.debug("Reentrant initial marking for arc : "+str(arc)+" : "+str(M0))
     return M0tot
 
-def __calcReEntrantTest(graph):
+def __calcReEntrant(graph):
     M0tot = 0
     for arc in graph.getArcList() :
         if graph.isArcReEntrant(arc) :

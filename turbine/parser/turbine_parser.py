@@ -2,7 +2,7 @@ from models.graph import Graph
 import StringIO
 import sys
 
-def write(dataflow, fileName):
+def write_tur_file(dataflow, fileName):
     output = StringIO.StringIO()
 
     output.write("#Graph_name\n")
@@ -22,7 +22,7 @@ def write(dataflow, fileName):
     for arc in dataflow.getArcList():
         strArc = str(str(arc).split(",")[0])+","+str(str(arc).split(",")[1])+")"
         output.write(strArc.replace(" ","")+" ")
-        output.write(str(dataflow.getInitialMarking(arc))+" ")
+        output.write(str(int(dataflow.getInitialMarking(arc)))+" ")
         output.write(dataflow.getProdStr(arc)+" ")
         output.write(dataflow.getConsStr(arc)+"\n")
         
@@ -33,13 +33,13 @@ def write(dataflow, fileName):
     output.close()
     openFile.close()
 
-def read(fileName):
+def read_tur_file(fileName):
     openFile = open(fileName, "r")
-    name, dataflowType = readline(openFile).replace("\n","").split(" ")
+    name, dataflowType = __readline(openFile).replace("\n","").split(" ")
     dataflow = Graph(name)
-    nbTask, nbArc = readline(openFile).split(" ")
+    nbTask, nbArc = __readline(openFile).split(" ")
     for i in xrange(int(nbTask)):
-        line = readline(openFile).replace("\n","")
+        line = __readline(openFile).replace("\n","")
         taskName, Rt, strDur = line.split(" ")
         task = dataflow.addTask(taskName)
         dataflow.setRepetitionFactor(task, int (Rt))
@@ -52,9 +52,9 @@ def read(fileName):
         durList = [int(float(i)) for i in strDur.split(",")]
         dataflow.setPhaseCount(task,len(durList))
         dataflow.setPhaseDurationList(task,durList)
-            
+
     for i in xrange(int(nbArc)):
-        line = readline(openFile).replace("\n","")
+        line = __readline(openFile).replace("\n","")
         strArc, strM0, strProd, strCons = line.split(" ")
         source = dataflow.getTaskByName(strArc.split(",")[0][1:])
         target = dataflow.getTaskByName(strArc.split(",")[1][:-1])
@@ -62,9 +62,15 @@ def read(fileName):
         arc = dataflow.addArc(source, target)
         dataflow.setInitialMarking(arc, M0)
         
+        if dataflow.getPhaseCountInit(source) == 0:
+            dataflow.setProdInitList(arc,[])
+        if dataflow.getPhaseCountInit(target) == 0:
+            dataflow.setConsInitList(arc,[])
+            dataflow.setConsInitThresholdList(arc,[])
+            
         if ";" in strProd:
             strProdinit, strProd = strProd.split(";")
-            prodInit =  [int (i) for i in strProdinit.split(",")]
+            prodInit = [int (i) for i in strProdinit.split(",")]
             dataflow.setProdInitList(arc, prodInit)
 
         prod = [int (i) for i in strProd.split(",")]
@@ -101,10 +107,10 @@ def read(fileName):
         dataflow.setConsList(arc, cons)
         if "PCG" in dataflowType :
             dataflow.setConsThresholdList(arc, consThreshold)
-
+            
     return dataflow
 
-def readline(openFile):
+def __readline(openFile):
     line = openFile.readline()
     while "#" in line:
         line = openFile.readline()

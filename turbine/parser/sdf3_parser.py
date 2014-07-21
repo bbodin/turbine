@@ -7,7 +7,7 @@ import xml.etree.cElementTree as ElementTree  # XML Stuff
 
 
 # indent ElementTree 
-def indent(elem, level=0):    
+def indent(elem, level=0):
     i = "\n" + level*"  "
     if len(elem):
         if not elem.text or not elem.text.strip():

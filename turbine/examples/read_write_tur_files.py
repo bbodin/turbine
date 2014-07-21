@@ -9,9 +9,9 @@ TUR files are note XML, they are 10 times samller than SDF3 files and easy to wr
 '''
 
 from generation.generate import generate
+from parser.turbine_parser import write, read
 import param.parameters
 
-from parser.turbine_parser import read, write
 
 #Setup the PCG generation.
 c_param= param.parameters.Parameters()
@@ -23,7 +23,7 @@ c_param.setMaxPhaseCountInit(5)
 c_param.setIsThreshold(True)
 c_param.setMinArcsCount(1)
 c_param.setMaxArcsCount(5)
-c_param.setNbTask(100)
+c_param.setNbTask(10)
 
 #Generate a PCG
 PCG = generate("Test_of_PCG", c_param)

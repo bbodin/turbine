@@ -6,7 +6,7 @@ Created on Jul 4, 2014
 from generation.graphComputation import __generateConnexGraph
 from generation.ratesComputation import  generateWeight
 from models.graph import Graph
-from random import randint
+from random import randint, randrange
 import logging
 import param.parameters
 import random
@@ -35,6 +35,7 @@ def generate(graphName = "generated_graph", c_param = None):
     __generateArcs(graph, c_param)
     logging.info("Generating weight")
     generateWeight(graph, c_param)
+    __generateInitialMarking(graph)
     logging.info("Generating done : "+str(time.time() - start)+"s")
     return graph
 
@@ -54,3 +55,12 @@ def __generateArcs(graph, c_param):
         for i in xrange(arcsOutCount):
             target = random.choice(topologicalList[(k+1):])
             graph.addArc(task, target)
+
+def __generateInitialMarking(graph):
+    for arc in graph.getArcList():
+        i = randint(1,10)
+        min_ = min(sum(graph.getProdList(arc)),sum(graph.getConsList(arc)))
+        max_ = max(sum(graph.getProdList(arc)),sum(graph.getConsList(arc)))
+        initialMarking = randint(i*min_,i*max_)
+        graph.setInitialMarking(arc, initialMarking)
+    graph.printBuffer()

@@ -72,6 +72,13 @@ class Graph :
         return s
     
     def setNx(self, nx):
+        """Replace the networkX graph of this object by a new one.
+        Useful when using networkX algorithms
+
+        Parameters
+        ----------
+        nx : a networkX graph.
+        """
 
         self.nxg = nx
 
@@ -181,6 +188,15 @@ class Graph :
         self.nxg.node[new_task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST] = []
 
         return new_task
+
+    def removeTask(self,task):
+        """Remove a task in the graph and all adjacent arcs. 
+
+        Parameters
+        ----------
+        task : the id of the task.
+        """
+        self.nxg.remove_node(task)
 
     def setTaskName(self, task, name):
         """Modify the name of the task in parameters.
@@ -318,7 +334,7 @@ class Graph :
         True if both length corresponds.
         """
         if lengthList != self.getPhaseCountInit(task):
-            raise BaseException("On task "+str(task)+" : the length of the initial phase list  ("+str(lengthList)+")  does not match with the phase count of the task("+str( self.getPhaseCountInit(task))+")")
+            raise BaseException("On task "+str(task)+" : the length of the initial phase list  (len="+str(lengthList)+")  does not match with the phase count of the task(count="+str( self.getPhaseCountInit(task))+")")
 
 ########################################################################
 #                           add/modify arc                             #
@@ -654,15 +670,24 @@ class Graph :
             return "CSDFG"
         return "PCG"
     
-    def getNormalizedGraph(self):
+    def normalizedGraph(self):
+        """normalized the graph (i.e. the sum of all weight of a task become equal). 
+        """
         if self.isNormalized():
             logging.error("Graph already normalized !")
             return self
         if 'nor' not in self.__dict__:
             self.nor = Normalized(self)
-        return self.nor.getGraphNorm()
+        self.nor.normGraph()
     
-    def getUnNormalizedGraph(self, vector = None):
+    def unNormalizedGraph(self, vector = None):
+        """un-normalized the graph (i.e. the sum of all weight of a task become non-equal).
+        
+        Parameters
+        ----------
+        vector : (default : None) vector of multiplier of each arcs of the graph.
+        If None the vector is generate randomly.
+        """
         if not self.isNormalized():
             logging.error("Graph already un-normalized !")
             return self
@@ -670,16 +695,35 @@ class Graph :
             self.nor = Normalized(self)
             if vector == None :
                 vector = self.nor.getvectorUnNorm()
-        return self.nor.getGraphUnNorm(self, vector)
+        self.nor.unNormGraph(self, vector)
     
     def computeInitialMarking(self, solver = "auto", GLPKVerbose = False, LPFileName = None):
+        """Generate the initial marking of the graph such that it's became alive.
+        Initial marking computation is handle by GLPK a linear solver.
+        
+        Parameters
+        ----------
+        solver : (string) the solver which compute the initial marking (SC1 or SC2).
+        If default (None) the solver choose by comparing the number of constraints related to sufficient condition (SC1 or SC2).
+        
+        GLPKVerbose : if True the terminal will show GLPK informations.
+        
+        LPFileName : if not None, the solver will write the linear program used to compute initial marking.
+        """
         generateInitialMarking(self,solver = solver, GLPKVerbose=GLPKVerbose, LPFileName=LPFileName)
 
     def clearInitialMarking(self):
+        """Set all initial marking to zero.
+        """
         for arc in self.getArcList():
             self.setInitialMarking(arc, 0)
             
     def symbolicExecution(self):
+        """Execute a symbolic execution of the graph.
+        If the execution succeed the graph is alive, if it does'nt the graph is not.
+        
+        The symbolic execution can be long if the sum of repetition factors is big. 
+        """
         exe = SymbolicExe(self)
         if exe.execute() == 0:
             print "Symbolic execution succeed"
@@ -1018,7 +1062,7 @@ class Graph :
             
         Return
         ------
-        The string look like : 1:2,2;3:4,6 which correspond to :
+        The string look like : 1,2:2,2;3,6:4,6 which correspond to :
             before the semicolon :
                 initial consumption : 1,2
                 initial threshold : 2,2
@@ -1227,17 +1271,12 @@ class Graph :
     def printInfo(self):
         """Print informations about the graph.
         """
-        degreeInMoy = 0
         degreeInTot = 0
-        degreeOutMoy = 0
         degreeOutTot = 0
-        degreeMoy = 0
 
         RVTot = 0
-        RVMoy = 0
 
         phasesTot = 0
-        phasesMoy = 0
 
         for task in self.getTaskList():
             degreeInTot+=len(self.getArcList(target = task))
@@ -1247,23 +1286,15 @@ class Graph :
 
             phasesTot += self.getPhaseCount(task)
 
-        degreeInMoy = degreeInTot/self.getTaskCount()
-        degreeOutMoy = degreeOutTot/self.getTaskCount()
-        degreeMoy = (degreeInTot + degreeOutTot)/self.getTaskCount()
-
-        RVMoy = RVTot/self.getTaskCount()
-
-        phasesMoy = phasesTot/self.getTaskCount()
-
         print "Graph : "+str(self.getName())+", Type : "+str(self.getGraphType())
         print "Normalized : "+str(self.isNormalized())+", Multigraph : "+str(self.isMultigraph())+", reentrant : "+str(self.isReentrant())
         print "Number of tasks : "+str(self.getTaskCount())
         print "Number of edges : "+str(self.getArcCount())
-        print "Task incoming degree tot: "+str(degreeInTot)+", moy : "+str(degreeInMoy)
-        print "Task outgoing degree tot: "+str(degreeOutTot)+", moy : "+str(degreeOutMoy)
-        print "Task degree tot: "+str(degreeInTot + degreeOutTot)+", moy : "+str(degreeMoy)
-        print "Repetition factor tot : "+str(RVTot)+", moy : "+str(RVMoy)
-        print "Phases tot : "+str(phasesTot)+", moy : "+str(phasesMoy)
+        print "Task incoming degree tot: "+str(degreeInTot)+", moy : "+str(degreeInTot/self.getTaskCount())
+        print "Task outgoing degree tot: "+str(degreeOutTot)+", moy : "+str(degreeOutTot/self.getTaskCount())
+        print "Task degree tot: "+str(degreeInTot + degreeOutTot)+", moy : "+str((degreeInTot + degreeOutTot)/self.getTaskCount())
+        print "Repetition factor tot : "+str(RVTot)+", moy : "+str(RVTot/self.getTaskCount())
+        print "Phases tot : "+str(phasesTot)+", moy : "+str(phasesTot/self.getTaskCount())
         print "Tot initial marking : "+str(self.getTotInitialMarking())
 
         
@@ -1276,7 +1307,7 @@ class Graph :
     def isCyclic(self) :
         """Return true if the graph has cycle (reentrant arcs are not considerate as cycle).
         """
-        return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1 or self.isReEntrant()
+        return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1 or self.isReentrant()
 
     def strTask(self, task):
         """Return a string which represent a task.
@@ -1328,13 +1359,19 @@ class Graph :
             print str(arc)+" M0:"+str(self.getInitialMarking(arc))
 
     def isMultigraph(self):
+        """Return True if the graph is a multigraph 
+        (i.e. of there exist two arc from a task to another). 
+        """
         for arc in self.getArcList():
-            source, target, key = arc
+            source, target = self.getSource(arc),self.getTarget(arc)
             if len(self.getArcList(source = source, target = target)) > 1:
                 return True
         return False
 
     def isReentrant(self):
+        """Return True if the graph is reentrant 
+        (i.e. if there is at least one arc such as the source and the target are the same task)
+        """
         for arc in self.getArcList():
             if self.isArcReEntrant(arc):
                 return True
@@ -1369,4 +1406,3 @@ class Graph :
             if weighteSource != weighteTarget :
                 return False
         return True
-
