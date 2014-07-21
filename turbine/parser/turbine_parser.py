@@ -2,7 +2,7 @@ from models.graph import Graph
 import StringIO
 import sys
 
-def write_tur_file(dataflow, fileName):
+def write(dataflow, fileName):
     output = StringIO.StringIO()
 
     output.write("#Graph_name\n")
@@ -33,7 +33,7 @@ def write_tur_file(dataflow, fileName):
     output.close()
     openFile.close()
 
-def read_tur_file(fileName):
+def read(fileName):
     openFile = open(fileName, "r")
     name, dataflowType = __readline(openFile).replace("\n","").split(" ")
     dataflow = Graph(name)
