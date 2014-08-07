@@ -1,8 +1,10 @@
-from models.graph import Graph
 import StringIO
 import sys
 
-def write(dataflow, fileName):
+from models.graph import Graph
+
+
+def write_tur_file(dataflow, fileName):
     output = StringIO.StringIO()
 
     output.write("#Graph_name\n")
@@ -33,7 +35,7 @@ def write(dataflow, fileName):
     output.close()
     openFile.close()
 
-def read(fileName):
+def read_tur_file(fileName):
     openFile = open(fileName, "r")
     name, dataflowType = __readline(openFile).replace("\n","").split(" ")
     dataflow = Graph(name)
@@ -62,11 +64,12 @@ def read(fileName):
         arc = dataflow.addArc(source, target)
         dataflow.setInitialMarking(arc, M0)
         
-        if dataflow.getPhaseCountInit(source) == 0:
-            dataflow.setProdInitList(arc,[])
-        if dataflow.getPhaseCountInit(target) == 0:
-            dataflow.setConsInitList(arc,[])
-            dataflow.setConsInitThresholdList(arc,[])
+        if "PCG" in dataflowType :
+            if dataflow.getPhaseCountInit(source) == 0:
+                dataflow.setProdInitList(arc,[])
+            if dataflow.getPhaseCountInit(target) == 0:
+                dataflow.setConsInitList(arc,[])
+                dataflow.setConsInitThresholdList(arc,[])
             
         if ";" in strProd:
             strProdinit, strProd = strProd.split(";")

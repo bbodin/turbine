@@ -9,8 +9,9 @@ Example of how to test the liveness of the graph by executing a symbolic executi
 from generation.generate import generate
 import param.parameters
 
-#Parameters of the generator.
-c_param= param.parameters.Parameters()
+
+# Parameters of the generator.
+c_param = param.parameters.Parameters()
 c_param.setMinPhaseCount(1)
 c_param.setMaxPhaseCount(5)
 c_param.setIsInitialized(True)

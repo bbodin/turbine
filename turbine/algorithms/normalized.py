@@ -1,5 +1,6 @@
-from models.lcm import lcmList
 import logging
+
+from models.lcm import lcmList
 
 
 class Normalized :
@@ -15,7 +16,7 @@ class Normalized :
         self.coefVector = None
         self.log = logging.getLogger('normalization')
 
-    def getGraphUnNorm(self, graph, coefVector = None):
+    def unNormGraph(self, graph, coefVector=None):
         """Un-normalize according to a coefficient vector.
         
         Return
@@ -37,21 +38,20 @@ class Normalized :
 
         for arc in self.graph.getArcList():
             coef = coefVector[arc]
-            self.graph.setProdList(arc,[int(x/coef) for x in self.graph.getProdList(arc)])
-            self.graph.setConsList(arc,[int(x/coef) for x in self.graph.getConsList(arc)])
+            self.graph.setProdList(arc, [int(x / coef) for x in self.graph.getProdList(arc)])
+            self.graph.setConsList(arc, [int(x / coef) for x in self.graph.getConsList(arc)])
 
-            self.graph.setInitialMarking(arc,int(self.graph.getInitialMarking(arc)/coef))
+            self.graph.setInitialMarking(arc, int(self.graph.getInitialMarking(arc) / coef))
 
             if self.graph.isInitialized() :
-                self.graph.setProdInitList(arc, [int(x/coef) for x in self.graph.getProdInitList(arc)])
-                self.graph.setConsInitList(arc, [int(x/coef) for x in self.graph.getConsInitList(arc)])
+                self.graph.setProdInitList(arc, [int(x / coef) for x in self.graph.getProdInitList(arc)])
+                self.graph.setConsInitList(arc, [int(x / coef) for x in self.graph.getConsInitList(arc)])
             
             if self.graph.isThresholded() :
-                self.graph.setConsThresholdList(arc, [int(x/coef) for x in self.graph.getConsThresholdList(arc)])
+                self.graph.setConsThresholdList(arc, [int(x / coef) for x in self.graph.getConsThresholdList(arc)])
 
             if self.graph.isThresholded() and self.graph.isInitialized() :
-                self.graph.setConsInitThresholdList(arc, [int(x/coef) for x in self.graph.getConsInitThresholdList(arc)])
-        return self.graph
+                self.graph.setConsInitThresholdList(arc, [int(x / coef) for x in self.graph.getConsInitThresholdList(arc)])
     
     def __testCoefVector(self, coefVector):
         if len(coefVector) != len(self.graph.getArcList()):
@@ -83,14 +83,14 @@ class Normalized :
 
     def __testCoef(self, coef, coefList):
         for x in coefList:
-            if (float(x)/float(coef)) != (x/coef):
+            if (float(x) / float(coef)) != (x / coef):
                 return False
         return True 
 
         
         
         
-    def getGraphNorm(self):
+    def normGraph(self):
         """Normalize according to a coefficient vector.
         
         Return
@@ -105,24 +105,22 @@ class Normalized :
         for arc in self.graph.getArcList():
             coef = self.coefVector[arc]
             
-            self.graph.setProdList(arc,[int(x*coef) for x in self.graph.getProdList(arc)])
-            self.graph.setConsList(arc,[int(x*coef) for x in self.graph.getConsList(arc)])
+            self.graph.setProdList(arc, [int(x * coef) for x in self.graph.getProdList(arc)])
+            self.graph.setConsList(arc, [int(x * coef) for x in self.graph.getConsList(arc)])
 
-            self.graph.setInitialMarking(arc,int(self.graph.getInitialMarking(arc)*coef))
+            self.graph.setInitialMarking(arc, int(self.graph.getInitialMarking(arc) * coef))
 
             if self.graph.isInitialized() :
-                self.graph.setProdInitList(arc, [int(x*coef) for x in self.graph.getProdInitList(arc)])
-                self.graph.setConsInitList(arc, [int(x*coef) for x in self.graph.getConsInitList(arc)])
+                self.graph.setProdInitList(arc, [int(x * coef) for x in self.graph.getProdInitList(arc)])
+                self.graph.setConsInitList(arc, [int(x * coef) for x in self.graph.getConsInitList(arc)])
             
             if self.graph.isThresholded() :
-                self.graph.setConsThresholdList(arc, [int(x*coef) for x in self.graph.getConsThresholdList(arc)])
+                self.graph.setConsThresholdList(arc, [int(x * coef) for x in self.graph.getConsThresholdList(arc)])
 
             if self.graph.isThresholded() and self.graph.isInitialized() :
-                self.graph.setConsInitThresholdList(arc, [int(x*coef) for x in self.graph.getConsInitThresholdList(arc)])
+                self.graph.setConsInitThresholdList(arc, [int(x * coef) for x in self.graph.getConsInitThresholdList(arc)])
 
-        return self.graph
-
-    def getvectorUnNorm(self):
+    def getVectorUnNorm(self):
         """Compute the smallest vector for denormalized the graph.
         
         ------
@@ -153,6 +151,6 @@ class Normalized :
         for arc in self.graph.getArcList():
             Ri = self.graph.getRepetitionFactor(self.graph.getSource(arc))
             Zi = sum(self.graph.getProdList(arc))
-            coef[arc] = (lcmV/Ri)/Zi
+            coef[arc] = (lcmV / Ri) / Zi
         self.coefVector = coef
         return self.coefVector

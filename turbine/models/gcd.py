@@ -1,4 +1,4 @@
-def gcd(a,b):
+def gcd(a, b):
     """return the PGCD between two integer.
 
     Parameters
@@ -9,8 +9,8 @@ def gcd(a,b):
     -------
     the pgcd between the two integer
     """
-    while b<>0 :
-        a,b=b,a%b
+    while b <> 0 :
+        a, b = b, a % b
     return a
 
 def gcdList(l):
@@ -27,5 +27,5 @@ def gcdList(l):
     gcdValue = l[0]
 
     for i in l:
-        gcdValue = gcd(i,gcdValue)
+        gcdValue = gcd(i, gcdValue)
     return gcdValue

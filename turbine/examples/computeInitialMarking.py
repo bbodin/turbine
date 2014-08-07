@@ -9,8 +9,9 @@ Example of how to compute the initial marking of a graph.
 from generation.generate import generate
 import param.parameters
 
-#Setup the PCG generation.
-c_param= param.parameters.Parameters()
+
+# Setup the PCG generation.
+c_param = param.parameters.Parameters()
 c_param.setMinPhaseCount(1)
 c_param.setMaxPhaseCount(5)
 c_param.setIsInitialized(True)
@@ -21,17 +22,17 @@ c_param.setMinArcsCount(1)
 c_param.setMaxArcsCount(5)
 c_param.setNbTask(100)
 
-#Generate a PCG
+# Generate a PCG
 PCG = generate("Test_of_PCG", c_param)
 print "#################generated graph#################"
 PCG.printInfo()
 
-#Set all initial marking to 0
+# Set all initial marking to 0
 PCG.clearInitialMarking()
 print "#################cleared graph#################"
 PCG.printInfo()
 
-#Compute the minimal initial marking
+# Compute the minimal initial marking
 PCG.computeInitialMarking()
 print "#################compute graph#################"
 PCG.printInfo()

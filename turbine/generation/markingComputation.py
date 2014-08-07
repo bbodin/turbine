@@ -1,6 +1,7 @@
+import logging
+
 from algorithms.solve_SC1 import SolverSC1
 from algorithms.solve_SC2 import SolverSC2
-import logging
 
 
 def __sumPreload(graph):
@@ -11,13 +12,13 @@ def __sumPreload(graph):
 
 def __clearInitialMarking(graph):
     for edge in graph.getArcList() :
-        graph.setInitialMarking(edge,0)
+        graph.setInitialMarking(edge, 0)
 
 
 ########################################################################
 #                           generate preload                           #
 ########################################################################
-def generateInitialMarking(graph, solver = "auto", GLPKVerbose = False, LPFileName = None):
+def generateInitialMarking(graph, solver="auto", GLPKVerbose=False, LPFileName=None):
     """Step 3
     """
     __clearInitialMarking(graph)
@@ -26,7 +27,7 @@ def generateInitialMarking(graph, solver = "auto", GLPKVerbose = False, LPFileNa
         solver = SolverSC2(graph, GLPKVerbose, LPFileName)
     elif solver == "SC1" :
         solver = SolverSC1(graph, GLPKVerbose, LPFileName)
-    elif solver ==  "auto" :
+    elif solver == "auto" :
         if __SC2RowCount(graph) < __SC1RowCount(graph) :
             solver = SolverSC2(graph, GLPKVerbose, LPFileName)
             logging.info("choose solver SC2")
@@ -39,7 +40,7 @@ def generateInitialMarking(graph, solver = "auto", GLPKVerbose = False, LPFileNa
 
     solver.generateInitialMarking()
     M0tot = __calcReEntrant(graph)
-    logging.info("Mem tot (reentrant) : "+str(M0tot))
+    logging.info("Mem tot (reentrant) : " + str(M0tot))
     
 
 def __SC2RowCount(graph):
@@ -49,10 +50,10 @@ def __SC2RowCount(graph):
         taskReEntrant = 0
         for arc in graph.getInputArcList(task):
             if graph.isArcReEntrant(arc) :
-                taskReEntrant+=1
-        FRowCount-= taskReEntrant
-        rowCount += ((graph.getInputDegree(task)-taskReEntrant) * (graph.getOutputDegree(task)-taskReEntrant))
-    return rowCount+FRowCount
+                taskReEntrant += 1
+        FRowCount -= taskReEntrant
+        rowCount += ((graph.getInputDegree(task) - taskReEntrant) * (graph.getOutputDegree(task) - taskReEntrant))
+    return rowCount + FRowCount
 
 def __SC1RowCount(graph):
     rowCount = 0
@@ -61,8 +62,8 @@ def __SC1RowCount(graph):
         target = graph.getTarget(arc)
         if not graph.isArcReEntrant(arc) :
             if graph.isInitialized() :
-                sourcePhaseCount = graph.getPhaseCount(source)+graph.getPhaseCountInit(source)
-                targetPhaseCount = graph.getPhaseCount(target)+graph.getPhaseCountInit(target)
+                sourcePhaseCount = graph.getPhaseCount(source) + graph.getPhaseCountInit(source)
+                targetPhaseCount = graph.getPhaseCount(target) + graph.getPhaseCountInit(target)
                 rowCount += sourcePhaseCount * targetPhaseCount
             else :
                 rowCount += graph.getPhaseCount(source) * graph.getPhaseCount(target)
@@ -79,12 +80,12 @@ def __calcReEntrantPreload(graph):
             step = graph.getGcd(arc)
             M0 = sum(cons) - step
             
-            if M0%step != 0 or M0 == 0:
-                M0+= (step - M0%step)
+            if M0 % step != 0 or M0 == 0:
+                M0 += (step - M0 % step)
 
             graph.setInitialMarking(arc, M0)
             M0tot += M0
-            logging.debug("Reentrant initial marking for arc : "+str(arc)+" : "+str(M0))
+            logging.debug("Reentrant initial marking for arc : " + str(arc) + " : " + str(M0))
     return M0tot
 
 def __calcReEntrant(graph):
@@ -98,7 +99,7 @@ def __calcReEntrant(graph):
             if graph.isInitialized() :
                 phaseCount += graph.getPhaseCountInit(graph.getTarget(arc))
                 prodList = graph.getProdInitList(arc) + prodList
-                consList =  graph.getConsInitList(arc) + consList
+                consList = graph.getConsInitList(arc) + consList
                 thresholdList = graph.getConsInitThresholdList(arc) + thresholdList
         
             retMax = graph.getConsList(arc)[0]
@@ -108,8 +109,8 @@ def __calcReEntrant(graph):
             In = 0
             for phase in xrange(phaseCount):
                 if phase > 0 :
-                    predOut += prodList[phase-1]
-                    predIn += consList[phase-1]
+                    predOut += prodList[phase - 1]
+                    predIn += consList[phase - 1]
                 In += consList[phase]
         
                 W2 = In - predOut
@@ -119,7 +120,7 @@ def __calcReEntrant(graph):
                 if retMax < W2 : retMax = W2
                 graph.setInitialMarking(arc, retMax)
                 M0tot += retMax
-                logging.debug("Reentrant initial marking for arc : "+str(arc)+" : "+str(retMax))
+                logging.debug("Reentrant initial marking for arc : " + str(arc) + " : " + str(retMax))
 
     return M0tot
 

@@ -1,8 +1,9 @@
 import logging
 
+
 class Error(Exception):
     pass
-error = Error   # backward compatibility
+error = Error  # backward compatibility
 
 class Parameters :
     """This class contains all options for generate dataflow graph
@@ -11,54 +12,54 @@ class Parameters :
     def __init__(self) :
 
         #~~~~~~~~~~~~~~~~~~~~~~~GENERATOR~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        #GRAPH
-        #Number of task in the graph
+        # GRAPH
+        # Number of task in the graph
         self.__NB_TASK = 10
-        #Minimum output/input arc count for the graph
+        # Minimum output/input arc count for the graph
         self.__MIN_ARCS_COUNT = 1
-        #Maximum output/input arc count for the graph 
+        # Maximum output/input arc count for the graph 
         self.__MAX_ARCS_COUNT = 5
 
-        #PHASES
-        #Minimum phase count for a task
+        # PHASES
+        # Minimum phase count for a task
         self.__MIN_PHASE_COUNT = 1
-        #Maximum phase count for a task
+        # Maximum phase count for a task
         self.__MAX_PHASE_COUNT = 5
-        #Average Time for a phase
+        # Average Time for a phase
         self.__AVERAGE_TIME = 10
 
-        #INITIAL PHASES
-        #Minimum initial phase count 
+        # INITIAL PHASES
+        # Minimum initial phase count 
         self.__MIN_PHASE_COUNT_INIT = 0
-        #Maximum initial phase count 
+        # Maximum initial phase count 
         self.__MAX_PHASE_COUNT_INIT = 2
-        #Average Initial time for a phase
+        # Average Initial time for a phase
         self.__AVERAGE_TIME_INIT = 10
         
-        #ARC
+        # ARC
         #
         self.__AVERAGE_WEIGHT_INIT = 10
 
-        #TASK
-        #Average repetition factor of a task
+        # TASK
+        # Average repetition factor of a task
         self.__AVERAGE_RF = 5
 
         #~~~~~~~~~~~~~~~~~~~~~~~GRAPH~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        #dataflow has threshold's consumption phases
+        # dataflow has threshold's consumption phases
         self.__THRESHOLD = True
-        #Dataflow has initial phases 
+        # Dataflow has initial phases 
         self.__INITIALIZED = True
-        #Dataflow has re-entrant arcs/edges
+        # Dataflow has re-entrant arcs/edges
         self.__NO_REENTRANT = False
 
         #~~~~~~~~~~~~~~~~~~~~~PRELOAD~SOLVER~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        #Select the initial marking's solver
+        # Select the initial marking's solver
         self.__SOLVER = "auto"
         
         #~~~~~~~~~~~~~~~~~~~~~PRINT~OPTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         self.__VERBOSE_GLPK = False
         self.__LOGGING_LEVEL = logging.ERROR
-        #The file name where the ILP of the initial marking's solver will be write
+        # The file name where the ILP of the initial marking's solver will be write
         self.__LP_FILENAME = None
         
 
@@ -66,7 +67,7 @@ class Parameters :
 ########################################################################
 #                           SETTERS                                    #
 ########################################################################
-    #GRAPH
+    # GRAPH
     def setNbTask(self, value):
         """Set the number of task/actors of the dataflow graph.
         default : 10
@@ -81,73 +82,73 @@ class Parameters :
         default : 1
         """        
         self.__verifyInteger(value)
-        self.__MIN_ARCS_COUNT =int(value)
+        self.__MIN_ARCS_COUNT = int(value)
 
     def setMaxArcsCount(self, value):
         """Set the maximum arcs count during the random selection of the dataflow graph.
         default : 5
         """        
         self.__verifyInteger(value)
-        self.__MAX_ARCS_COUNT =int(value)
+        self.__MAX_ARCS_COUNT = int(value)
 
-    #PHASES
+    # PHASES
     def setMinPhaseCount(self, value):
         """Set task's minimum phase count during the random selection of the dataflow graph.
         default : 1
         """
         self.__verifyInteger(value)
-        self.__MIN_PHASE_COUNT =int(value)
+        self.__MIN_PHASE_COUNT = int(value)
 
     def setMaxPhaseCount(self, value):
         """Set task's maximum phase count during the random selection of the dataflow graph.
         default : 5
         """        
         self.__verifyInteger(value)
-        self.__MAX_PHASE_COUNT =int(value)
+        self.__MAX_PHASE_COUNT = int(value)
 
     def setAverageTime(self, value):
         """Set phase's average time during the random selection of the dataflow graph.
         default : 10
         """        
         self.__verifyInteger(value)
-        self.__AVERAGE_TIME =int(value)
+        self.__AVERAGE_TIME = int(value)
 
-    #INITIAL PHASES
+    # INITIAL PHASES
     def setMinPhaseCountInit(self, value):
         """Set task's minimum initial phase count during the random selection of the dataflow graph.
         default : 0
         """        
         self.__verifyInteger(value)
-        self.__MIN_PHASE_COUNT_INIT =int(value)
+        self.__MIN_PHASE_COUNT_INIT = int(value)
 
     def setMaxPhaseCountInit(self, value):
         """Set task's maximum phase count during the random selection of the dataflow graph.
         default : 2
         """        
         self.__verifyInteger(value)
-        self.__MAX_PHASE_COUNT_INIT =int(value)
+        self.__MAX_PHASE_COUNT_INIT = int(value)
 
     def setAverageTimeInit(self, value):
         """Set initial phase's average time during the random selection of the dataflow graph.
         default : 10
         """        
         self.__verifyInteger(value)
-        self.__AVERAGE_TIME_INIT =int(value)
+        self.__AVERAGE_TIME_INIT = int(value)
 
     def setAverageWeightInit(self, value):
         """Set initial phase's average time during the random selection of the dataflow graph.
         default : 10
         """        
         self.__verifyInteger(value)
-        self.__AVERAGE_WEIGHT_INIT =int(value)
+        self.__AVERAGE_WEIGHT_INIT = int(value)
 
-    #Mean repetition factor
+    # Mean repetition factor
     def setAverageRepetitionFactor(self, value):
         """Set task's average repetition factor during the random selection of the dataflow graph.
         default : 5
         """        
         self.__verifyInteger(value)
-        self.__AVERAGE_RF =int(value)
+        self.__AVERAGE_RF = int(value)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GRAPH~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     def setIsThreshold(self, value):
@@ -176,7 +177,7 @@ class Parameters :
         self.__SOLVER = str(value)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~PRINT~OPTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    def setLoggingLevel(self,value):
+    def setLoggingLevel(self, value):
         """Set the logging level of the generator
         default : logging.ERROR
         """
@@ -186,19 +187,19 @@ class Parameters :
         default : False
         """
     def setGLPKVerbose(self, value):
-        self.__VERBOSE_GLPK =  bool(value)
+        self.__VERBOSE_GLPK = bool(value)
         
 
     def setLPFileName(self, value):
         """Set the file name where the ILP of the initial marking's solver will be write
         None value By default (it will write nothing)
         """
-        self.__LP_FILENAME =  value
+        self.__LP_FILENAME = value
 
 ########################################################################
 #                           GETTERS                                    #
 ########################################################################
-    #GRAPH
+    # GRAPH
     def getNbTask(self):
         """Return the number of task/actors choose in parameters.
         """        
@@ -214,7 +215,7 @@ class Parameters :
         """        
         return self.__MAX_ARCS_COUNT
 
-    #PHASES
+    # PHASES
     def getMinPhaseCount(self):
         """Return the minimum phase count choose in parameters.
         """        
@@ -230,7 +231,7 @@ class Parameters :
         """        
         return self.__AVERAGE_TIME
 
-    #INITIAL PHASES
+    # INITIAL PHASES
     def getMinPhaseCountInit(self):
         """Return the minimum initial phase count choose in parameters.
         """        
@@ -251,7 +252,7 @@ class Parameters :
         """        
         return self.__AVERAGE_WEIGHT_INIT
 
-    #Mean repetition factor
+    # Mean repetition factor
     def getAverageRepetitionFactor(self):
         """Return the average repetition factor choose in parameters.
         """        
@@ -297,7 +298,7 @@ class Parameters :
         """
         return self.__LOGGING_LEVEL
     
-    def __verifyInteger(self,value):
+    def __verifyInteger(self, value):
         if int(value) < 0 :
             raise Error("Wrong value : it must be positive")
 

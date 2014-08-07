@@ -1,11 +1,11 @@
 """Interface between networkx and the generator.
 """
-from algorithms.normalized import Normalized
-from algorithms.symbolic_exe import SymbolicExe
-from generation.markingComputation import generateInitialMarking
 import logging
 
+from algorithms.normalized import Normalized
+from algorithms.symbolic_exe import SymbolicExe
 from gcd import gcdList
+from generation.markingComputation import generateInitialMarking
 import networkx as nx
 
 
@@ -47,7 +47,7 @@ class Graph :
     CONST_ARC_CONS_PORT_NAME = "cPN"
     CONST_ARC_PROD_PORT_NAME = "pPN"
 
-    def __init__(self, name = "") :
+    def __init__(self, name="") :
         """Initialize a graph.
 
         Parameters
@@ -56,7 +56,7 @@ class Graph :
             An optional name for the graph.
         """
 
-        self.nxg = nx.MultiDiGraph(name = name)
+        self.nxg = nx.MultiDiGraph(name=name)
         self.setName(name)
         self.__setPhased(False)
         self.__setThreshold(False)
@@ -67,8 +67,8 @@ class Graph :
         self.taskByName = {}
         self.arcByName = {}
 
-    def __str__( self ) :
-        s = "Graph name : " + self.nxg.graph[self.CONST_GRAPH_NAME] +"\n"
+    def __str__(self) :
+        s = "Graph name : " + self.nxg.graph[self.CONST_GRAPH_NAME]
         return s
     
     def setNx(self, nx):
@@ -112,7 +112,7 @@ class Graph :
 
             if self.getSource(arc) == self.getTarget(arc):
                 self.__setReEntrant(True)
-            if len(self.getArcList(source=self.getSource(arc), target=self.getTarget(arc)))>1 :
+            if len(self.getArcList(source=self.getSource(arc), target=self.getTarget(arc))) > 1 :
                 self.__setMultigraph(True)
 
     def drawit(self):
@@ -121,7 +121,7 @@ class Graph :
 ########################################################################
 #                           modify graph                               #
 ########################################################################
-    def setName(self,name):
+    def setName(self, name):
         """Modify the graph's name.
 
         Parameters
@@ -169,27 +169,27 @@ class Graph :
         """
         new_task = self.taskKey
         if name == None :
-            name = "t"+str(new_task)
+            name = "t" + str(new_task)
 
-        try :#Detect if a task with the same name exist
+        try :  # Detect if a task with the same name exist
             self.getTaskByName(name)
             logging.error("Name already used by another task")
-            return None#If it is the case the present task is not add.
+            return None  # If it is the case the present task is not add.
         except KeyError :
             pass
 
-        self.taskKey+=1
+        self.taskKey += 1
         self.taskByName[name] = new_task
 
         self.nxg.add_node(new_task)
-        self.setTaskName(new_task,name)
+        self.setTaskName(new_task, name)
 
         self.nxg.node[new_task][self.CONST_TASK_PHASE_DURATION_LIST] = [1]
         self.nxg.node[new_task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST] = []
 
         return new_task
 
-    def removeTask(self,task):
+    def removeTask(self, task):
         """Remove a task in the graph and all adjacent arcs. 
 
         Parameters
@@ -232,21 +232,21 @@ class Graph :
         Note that if (and only if) the phase count is different than the previous one,
         all incidents arcs will have their cyclic weights reinitialized.
         """
-        #If the number of phase is the same as before, do nothing
+        # If the number of phase is the same as before, do nothing
         if phaseCount == self.getPhaseCount(task):
             return
 
         if phaseCount > 1:
             self.__setPhased(True)
             
-        self.nxg.node[task][self.CONST_TASK_PHASE_DURATION_LIST] = [1]*phaseCount
+        self.nxg.node[task][self.CONST_TASK_PHASE_DURATION_LIST] = [1] * phaseCount
         
         for arc in self.getArcList(target=task):
-            self.__setArcAttribute(arc,[1]*phaseCount,self.CONST_ARC_CONS_LIST)
-            self.__setArcAttribute(arc,[0]*phaseCount,self.CONST_ARC_CONS_THRESOLD_LIST)
+            self.__setArcAttribute(arc, [1] * phaseCount, self.CONST_ARC_CONS_LIST)
+            self.__setArcAttribute(arc, [0] * phaseCount, self.CONST_ARC_CONS_THRESOLD_LIST)
 
         for arc in self.getArcList(source=task):
-            self.__setArcAttribute(arc,[1]*phaseCount,self.CONST_ARC_PROD_LIST)
+            self.__setArcAttribute(arc, [1] * phaseCount, self.CONST_ARC_PROD_LIST)
 
     def setPhaseCountInit (self, task, phaseCountInit):
         """Modify the initial phase count of a task and initialize the list of all connected arc's
@@ -264,13 +264,13 @@ class Graph :
             self.__setInitialized(True)
 
         
-        self.nxg.node[task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST] = [1]*phaseCountInit
+        self.nxg.node[task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST] = [1] * phaseCountInit
         for arc in self.getArcList(target=task):
-            self.__setArcAttribute(arc,[1]*phaseCountInit,self.CONST_ARC_INI_CONS_LIST)
-            self.__setArcAttribute(arc,[1]*phaseCountInit,self.CONST_ARC_INI_CONS_THRESOLD_LIST)
+            self.__setArcAttribute(arc, [1] * phaseCountInit, self.CONST_ARC_INI_CONS_LIST)
+            self.__setArcAttribute(arc, [1] * phaseCountInit, self.CONST_ARC_INI_CONS_THRESOLD_LIST)
 
         for arc in self.getArcList(source=task):
-            self.__setArcAttribute(arc,[1]*phaseCountInit,self.CONST_ARC_INI_PROD_LIST)
+            self.__setArcAttribute(arc, [1] * phaseCountInit, self.CONST_ARC_INI_PROD_LIST)
 
 
     def setPhaseDuration (self, task, phase, duration):
@@ -292,7 +292,7 @@ class Graph :
         task : the task targeted.
         phaseDurationList : the list of phase duration of the task (integer).
         """
-        self.__verifyLength(task,len(phaseDurationList))
+        self.__verifyLength(task, len(phaseDurationList))
         self.nxg.node[task][self.CONST_TASK_PHASE_DURATION_LIST] = phaseDurationList
 
     def setPhaseDurationInitList (self, task, iniPhaseDurationList):
@@ -303,7 +303,7 @@ class Graph :
         task : the task targeted.
         iniPhaseDurationList : the list of initial phase duration of the task (integer).
         """
-        self.__verifyLengthInit(task,len(iniPhaseDurationList))
+        self.__verifyLengthInit(task, len(iniPhaseDurationList))
         self.nxg.node[task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST] = iniPhaseDurationList
 
     def __verifyLength(self, task, lengthList):
@@ -319,7 +319,7 @@ class Graph :
         True if both length corresponds.
         """
         if lengthList != self.getPhaseCount(task):
-            raise BaseException("On task "+str(task)+" : the length of the phase list ("+str(lengthList)+") does not match with the phase count of the task ("+str( self.getPhaseCount(task))+")")
+            raise BaseException("On task " + str(task) + " : the length of the phase list (" + str(lengthList) + ") does not match with the phase count of the task (" + str(self.getPhaseCount(task)) + ")")
 
     def __verifyLengthInit(self, task, lengthList):
         """Compare the length of a list and the initial phase number of a task.
@@ -334,7 +334,7 @@ class Graph :
         True if both length corresponds.
         """
         if lengthList != self.getPhaseCountInit(task):
-            raise BaseException("On task "+str(task)+" : the length of the initial phase list  (len="+str(lengthList)+")  does not match with the phase count of the task(count="+str( self.getPhaseCountInit(task))+")")
+            raise BaseException("On task " + str(task) + " : the length of the initial phase list  (len=" + str(lengthList) + ")  does not match with the phase count of the task(count=" + str(self.getPhaseCountInit(task)) + ")")
 
 ########################################################################
 #                           add/modify arc                             #
@@ -355,31 +355,31 @@ class Graph :
 
         self.nxg.add_edge(source, target)
         key = self.nxg.edge[source][target].items()[-1][0]
-        arc = (source,target,key)
+        arc = (source, target, key)
 
-        self.setInitialMarking(arc,0)
-        self.setTokenSize(arc,1)
+        self.setInitialMarking(arc, 0)
+        self.setTokenSize(arc, 1)
 
-        self.__setArcAttribute(arc,[1]*self.getPhaseCount(source),self.CONST_ARC_PROD_LIST)
-        self.__setArcAttribute(arc,[1]*self.getPhaseCount(target),self.CONST_ARC_CONS_LIST)
+        self.__setArcAttribute(arc, [1] * self.getPhaseCount(source), self.CONST_ARC_PROD_LIST)
+        self.__setArcAttribute(arc, [1] * self.getPhaseCount(target), self.CONST_ARC_CONS_LIST)
 
-        self.setConsPortName(arc,"cons"+str(source)+""+str(target)+""+str(key))
-        self.setProdPortName(arc,"prod"+str(source)+""+str(target)+""+str(key))
+        self.setConsPortName(arc, "cons" + str(source) + "" + str(target) + "" + str(key))
+        self.setProdPortName(arc, "prod" + str(source) + "" + str(target) + "" + str(key))
 
-        name = "a"+str(key)
+        name = "a" + str(key)
 
-        self.setArcName(arc,name)
+        self.setArcName(arc, name)
 
-        return arc #return the tuple (source, target, key)
+        return arc  # return the tuple (source, target, key)
 
-    def removeArc(self,arc):
+    def removeArc(self, arc):
         """Remove an edge (arc of the graph.
         
         Parameters
         ----------
         arc : the arc to remove.
         """
-        self.nxg.remove_edge(arc[0],arc[1],arc[2])
+        self.nxg.remove_edge(arc[0], arc[1], arc[2])
 
     def __setArcAttribute(self, arc, attrib, attribName):
         """Set a specific attribute to the arc (prelo/cPoNa/pPoNa/...).
@@ -393,7 +393,7 @@ class Graph :
         """
         self.nxg[arc[0]][arc[1]][arc[2]][attribName] = attrib
 
-    def __setArcPhaseAttribute(self, arc, attrib, attribName, phase):#Not used
+    def __setArcPhaseAttribute(self, arc, attrib, attribName, phase):  # Not used
         """Set a specific attribute to the arc (prelo/cPoNa/pPoNa/...).
 
         Parameters
@@ -415,8 +415,8 @@ class Graph :
             (default name=lowest unused integer).
         """
         try :
-            gcd = gcdList(self.getConsList(arc)+self.getProdList(arc))
-            self.__setArcAttribute(arc,gcd, self.CONST_ARC_GCD)
+            gcd = gcdList(self.getConsList(arc) + self.getProdList(arc))
+            self.__setArcAttribute(arc, gcd, self.CONST_ARC_GCD)
         except KeyError :
             return
             
@@ -431,7 +431,7 @@ class Graph :
         """
         try :
             gcd = gcdList(self.getConsThresholdList(arc))
-            self.__setArcAttribute(arc,gcd, self.CONST_ARC_THRESHOLD_GCD)
+            self.__setArcAttribute(arc, gcd, self.CONST_ARC_THRESHOLD_GCD)
         except KeyError :
             return
 
@@ -445,11 +445,11 @@ class Graph :
             (default name=lowest unused integer).
         """
         try :
-            if len(self.getConsInitList(arc)+self.getProdInitList(arc)) > 0 :
-                gcd = gcdList(self.getConsInitList(arc)+self.getProdInitList(arc))
-                self.__setArcAttribute(arc,gcd, self.CONST_ARC_INIT_GCD)
+            if len(self.getConsInitList(arc) + self.getProdInitList(arc)) > 0 :
+                gcd = gcdList(self.getConsInitList(arc) + self.getProdInitList(arc))
+                self.__setArcAttribute(arc, gcd, self.CONST_ARC_INIT_GCD)
             else:
-                self.__setArcAttribute(arc,1, self.CONST_ARC_INIT_GCD)
+                self.__setArcAttribute(arc, 1, self.CONST_ARC_INIT_GCD)
         except KeyError :
             return
 
@@ -465,9 +465,9 @@ class Graph :
         try :
             if len(self.getConsInitThresholdList(arc)) > 0 :
                 gcd = gcdList(self.getConsInitThresholdList(arc))
-                self.__setArcAttribute(arc,gcd, self.CONST_ARC_INIT_THRESHOLD_GCD)
+                self.__setArcAttribute(arc, gcd, self.CONST_ARC_INIT_THRESHOLD_GCD)
             else:
-                self.__setArcAttribute(arc,1, self.CONST_ARC_INIT_THRESHOLD_GCD)
+                self.__setArcAttribute(arc, 1, self.CONST_ARC_INIT_THRESHOLD_GCD)
 
         except KeyError :
             return
@@ -502,7 +502,7 @@ class Graph :
         """
         self.__setArcAttribute(arc, preload, self.CONST_ARC_PRELOAD)
 
-    def setConsPortName(self, arc,consPortName):
+    def setConsPortName(self, arc, consPortName):
         """Set the consumption port name of an arc.
 
         Parameters
@@ -511,7 +511,7 @@ class Graph :
             (default name=lowest unused integer).
         consPortName : the name of the consumption port name.
 
-        This is only used with the SDF3 parser.
+        This is only used with the SDF3 file_parser.
         """
         self.__setArcAttribute(arc, consPortName, self.CONST_ARC_CONS_PORT_NAME)
 
@@ -524,7 +524,7 @@ class Graph :
             (default name=lowest unused integer).
         prodPortName : the name of the production port name.
 
-        This is only used with the SDF3 parser.
+        This is only used with the SDF3 file_parser.
         """
         self.__setArcAttribute(arc, prodPortName, self.CONST_ARC_PROD_PORT_NAME)
 
@@ -548,7 +548,7 @@ class Graph :
             (default name=lowest unused integer).
         consList : the list of consumption phase (integer list).
         """
-        self.__verifyLength(self.getTarget(arc),len(consList))
+        self.__verifyLength(self.getTarget(arc), len(consList))
         self.__setArcAttribute(arc, consList, self.CONST_ARC_CONS_LIST)
         self.__calcGcd(arc)
 
@@ -561,7 +561,7 @@ class Graph :
             (default name=lowest unused integer).
         consInitList : the list of initial consumption phase (integer list).
         """
-        self.__verifyLengthInit(self.getTarget(arc),len(consInitList))
+        self.__verifyLengthInit(self.getTarget(arc), len(consInitList))
         self.__setArcAttribute(arc, consInitList, self.CONST_ARC_INI_CONS_LIST)
         self.__calcGcdInit(arc)
 
@@ -575,7 +575,7 @@ class Graph :
         consThresholdList : the list of consumption threshold phase (integer list).
         """
         self.__setThreshold(True)
-        self.__verifyLength(self.getTarget(arc),len(consThresholdList))
+        self.__verifyLength(self.getTarget(arc), len(consThresholdList))
         self.__adjustThreshold(self.getConsList(arc), consThresholdList)
         self.__setArcAttribute(arc, consThresholdList, self.CONST_ARC_CONS_THRESOLD_LIST)
         self.__calcGcdTh(arc)
@@ -591,7 +591,7 @@ class Graph :
         phase (integer list).
         """    
         self.__setThreshold(True)
-        self.__verifyLengthInit(self.getTarget(arc),len(consInitThresholdList))
+        self.__verifyLengthInit(self.getTarget(arc), len(consInitThresholdList))
         self.__adjustThreshold(self.getConsInitList(arc), consInitThresholdList)
         self.__setArcAttribute(arc, consInitThresholdList, self.CONST_ARC_INI_CONS_THRESOLD_LIST)
         self.__calcGcdInitTh(arc)
@@ -605,7 +605,7 @@ class Graph :
             (default name=lowest unused integer).
         consThresholdList : the list of production phase (integer list).
         """
-        self.__verifyLength(self.getSource(arc),len(prodList))
+        self.__verifyLength(self.getSource(arc), len(prodList))
         self.__setArcAttribute(arc, prodList, self.CONST_ARC_PROD_LIST)
         self.__calcGcd(arc)
 
@@ -618,12 +618,12 @@ class Graph :
             (default name=lowest unused integer).
         consThresholdList : the list of initial production phase (integer list).
         """
-        self.__verifyLengthInit(self.getSource(arc),len(prodInitList))
+        self.__verifyLengthInit(self.getSource(arc), len(prodInitList))
         self.__setArcAttribute(arc, prodInitList, self.CONST_ARC_INI_PROD_LIST)
         self.__calcGcdInit(arc)
 
     def __adjustThreshold(self, List, thresholdList):
-        for i in range(0,len(List)) :
+        for i in range(0, len(List)) :
             if List[i] > thresholdList[i] :
                 thresholdList[i] = List[i]
 
@@ -680,7 +680,7 @@ class Graph :
             self.nor = Normalized(self)
         self.nor.normGraph()
     
-    def unNormalizedGraph(self, vector = None):
+    def unNormalizedGraph(self, vector=None):
         """un-normalized the graph (i.e. the sum of all weight of a task become non-equal).
         
         Parameters
@@ -697,7 +697,7 @@ class Graph :
                 vector = self.nor.getvectorUnNorm()
         self.nor.unNormGraph(self, vector)
     
-    def computeInitialMarking(self, solver = "auto", GLPKVerbose = False, LPFileName = None):
+    def computeInitialMarking(self, solver="auto", GLPKVerbose=False, LPFileName=None):
         """Generate the initial marking of the graph such that it's became alive.
         Initial marking computation is handle by GLPK a linear solver.
         
@@ -710,7 +710,7 @@ class Graph :
         
         LPFileName : if not None, the solver will write the linear program used to compute initial marking.
         """
-        generateInitialMarking(self,solver = solver, GLPKVerbose=GLPKVerbose, LPFileName=LPFileName)
+        generateInitialMarking(self, solver=solver, GLPKVerbose=GLPKVerbose, LPFileName=LPFileName)
 
     def clearInitialMarking(self):
         """Set all initial marking to zero.
@@ -824,15 +824,15 @@ class Graph :
         ----------
         string.
         """
-        if len(self.nxg.node[task][self.CONST_TASK_PHASE_DURATION_LIST])>0:
+        if len(self.nxg.node[task][self.CONST_TASK_PHASE_DURATION_LIST]) > 0:
             cyclo = str([int(i) for i in self.nxg.node[task][self.CONST_TASK_PHASE_DURATION_LIST]])[1:-1]
-        if len(self.nxg.node[task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST])>0:
-            init  = str([int(i) for i in self.nxg.node[task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST]])[1:-1]
+        if len(self.nxg.node[task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST]) > 0:
+            init = str([int(i) for i in self.nxg.node[task][self.CONST_TASK_INITIAL_PHASE_DURATION_LIST]])[1:-1]
             if len(init) > 0 :
-                return (str(init) + ";" + str(cyclo)).replace(" ","")
+                return (str(init) + ";" + str(cyclo)).replace(" ", "")
             else :
-                return str(cyclo).replace(" ","")
-        return str(cyclo).replace(" ","")
+                return str(cyclo).replace(" ", "")
+        return str(cyclo).replace(" ", "")
 
     def getPhaseDuration(self, task):
         """Return task phase duration list.
@@ -886,14 +886,14 @@ class Graph :
         A vector of arcs.
         
         """
-        if source == None and target != None :#target is filled, the method returns all input arcs of the target
+        if source == None and target != None :  # target is filled, the method returns all input arcs of the target
             return self.nxg.in_edges(target, keys=True)
-        if source != None and target == None :#source is filled, the method returns all output arcs of the source
+        if source != None and target == None :  # source is filled, the method returns all output arcs of the source
             return self.nxg.out_edges(source, keys=True)
-        if source == None and target == None :#Nothing is filled, the method return all arcs of the graph
-            return self.nxg.edges(keys = True)
-        #Both source and target are filled, the method return all arcs 
-        #with the source has a source and the target has a target.
+        if source == None and target == None :  # Nothing is filled, the method return all arcs of the graph
+            return self.nxg.edges(keys=True)
+        # Both source and target are filled, the method return all arcs 
+        # with the source has a source and the target has a target.
         return [x for x in self.nxg.in_edges(target, keys=True) if  self.getSource(x) == source]
 
     def getArcByName(self, name):
@@ -909,7 +909,7 @@ class Graph :
         """
         return self.arcByName[name]
 
-    def getInputArcList(self, task ) :
+    def getInputArcList(self, task) :
         """Return all input arcs of a task.
         
         Parameters
@@ -922,7 +922,7 @@ class Graph :
         """
         return self.nxg.in_edges(task, keys=True)
 
-    def getOutputArcList(self, task ) :
+    def getOutputArcList(self, task) :
         """Return all output arcs of a task.
         
         Parameters
@@ -963,7 +963,7 @@ class Graph :
         """
         return arc[1]
 
-    def isArcReEntrant(self,arc):
+    def isArcReEntrant(self, arc):
         """Return True if the arc is reentrant.
                 
         Parameters
@@ -1062,7 +1062,7 @@ class Graph :
             
         Return
         ------
-        The string look like : 1,2:2,2;3,6:4,6 which correspond to :
+        The string look like : 1:2,2;3:4,6 which correspond to :
             before the semicolon :
                 initial consumption : 1,2
                 initial threshold : 2,2
@@ -1075,17 +1075,17 @@ class Graph :
         if self.isInitialized():
             for i in range(0, self.getPhaseCountInit(arc[1])) :
                 if self.isThresholded() and len(self.getConsInitThresholdList(arc)) > 0 and self.getConsInitList(arc)[i] != self.getConsInitThresholdList(arc)[i] :
-                    result+=str(int(self.getConsInitList(arc)[i]))+":"+str(int(self.getConsInitThresholdList(arc)[i]))+","
+                    result += str(int(self.getConsInitList(arc)[i])) + ":" + str(int(self.getConsInitThresholdList(arc)[i])) + ","
                 else :
-                    result+=str(int(self.getConsInitList(arc)[i]))+","
+                    result += str(int(self.getConsInitList(arc)[i])) + ","
         if (len(result) > 0) :
-            result = result[0:-1]+";"#del the last comma
+            result = result[0:-1] + ";"  # del the last comma
         for i in range(0, self.getPhaseCount(arc[1])) :
             if self.isThresholded() and  len(self.getConsThresholdList(arc)) > 0 and self.getConsList(arc)[i] != self.getConsThresholdList(arc)[i] :
-                result+=str(int(self.getConsList(arc)[i]))+":"+str(int(self.getConsThresholdList(arc)[i]))+","
+                result += str(int(self.getConsList(arc)[i])) + ":" + str(int(self.getConsThresholdList(arc)[i])) + ","
             else :
-                result+=str(int(self.getConsList(arc)[i]))+","
-        return result[0:-1]#del the last comma
+                result += str(int(self.getConsList(arc)[i])) + ","
+        return result[0:-1]  # del the last comma
 
     def getProdStr(self, arc):
         """Return a string which recapitulate of production vectors of an arc. 
@@ -1106,12 +1106,12 @@ class Graph :
         result = ""
         if self.isInitialized():
             for i in range(0, self.getPhaseCountInit(arc[0])) :
-                result+=str(int(self.getProdInitList(arc)[i]))+","
+                result += str(int(self.getProdInitList(arc)[i])) + ","
         if (len(result) > 0) :
-            result = result[0:-1]+";"#del the last comma
+            result = result[0:-1] + ";"  # del the last comma
         for i in range(0, self.getPhaseCount(arc[0])) :
-            result+=str(int(self.getProdList(arc)[i]))+","
-        return result[0:-1]#del the last comma
+            result += str(int(self.getProdList(arc)[i])) + ","
+        return result[0:-1]  # del the last comma
 
     def getConsList(self, arc):
         """Return the consumption rate vector of the arc. 
@@ -1208,11 +1208,11 @@ class Graph :
         """
         step = self.__getGcd(arc)
         if self.isThresholded() :
-            step = gcdList([step]+[self.__getGcdTh(arc)])
+            step = gcdList([step] + [self.__getGcdTh(arc)])
         if self.isInitialized() :
-            step = gcdList([step]+[self.__getGcdInit(arc)])
+            step = gcdList([step] + [self.__getGcdInit(arc)])
         if self.isInitialized() and self.isThresholded() :
-            step = gcdList([step]+[self.__getGcdInitTh(arc)])
+            step = gcdList([step] + [self.__getGcdInitTh(arc)])
         return step
 
     def __getGcd(self, arc):
@@ -1279,23 +1279,23 @@ class Graph :
         phasesTot = 0
 
         for task in self.getTaskList():
-            degreeInTot+=len(self.getArcList(target = task))
-            degreeOutTot+=len(self.getArcList(source = task))
+            degreeInTot += len(self.getArcList(target=task))
+            degreeOutTot += len(self.getArcList(source=task))
 
-            RVTot +=self.getRepetitionFactor(task)
+            RVTot += self.getRepetitionFactor(task)
 
             phasesTot += self.getPhaseCount(task)
 
-        print "Graph : "+str(self.getName())+", Type : "+str(self.getGraphType())
-        print "Normalized : "+str(self.isNormalized())+", Multigraph : "+str(self.isMultigraph())+", reentrant : "+str(self.isReentrant())
-        print "Number of tasks : "+str(self.getTaskCount())
-        print "Number of edges : "+str(self.getArcCount())
-        print "Task incoming degree tot: "+str(degreeInTot)+", moy : "+str(degreeInTot/self.getTaskCount())
-        print "Task outgoing degree tot: "+str(degreeOutTot)+", moy : "+str(degreeOutTot/self.getTaskCount())
-        print "Task degree tot: "+str(degreeInTot + degreeOutTot)+", moy : "+str((degreeInTot + degreeOutTot)/self.getTaskCount())
-        print "Repetition factor tot : "+str(RVTot)+", moy : "+str(RVTot/self.getTaskCount())
-        print "Phases tot : "+str(phasesTot)+", moy : "+str(phasesTot/self.getTaskCount())
-        print "Tot initial marking : "+str(self.getTotInitialMarking())
+        print "Graph : " + str(self.getName()) + ", Type : " + str(self.getGraphType())
+        print "Normalized : " + str(self.isNormalized()) + ", Multigraph : " + str(self.isMultigraph()) + ", reentrant : " + str(self.isReEntrant())
+        print "Number of tasks : " + str(self.getTaskCount())
+        print "Number of edges : " + str(self.getArcCount())
+        print "Task incoming degree tot: " + str(degreeInTot) + ", moy : " + str(degreeInTot / self.getTaskCount())
+        print "Task outgoing degree tot: " + str(degreeOutTot) + ", moy : " + str(degreeOutTot / self.getTaskCount())
+        print "Task degree tot: " + str(degreeInTot + degreeOutTot) + ", moy : " + str((degreeInTot + degreeOutTot) / self.getTaskCount())
+        print "Repetition factor tot : " + str(RVTot) + ", moy : " + str(RVTot / self.getTaskCount())
+        print "Phases tot : " + str(phasesTot) + ", moy : " + str(phasesTot / self.getTaskCount())
+        print "Tot initial marking : " + str(self.getTotInitialMarking())
 
         
 
@@ -1307,15 +1307,15 @@ class Graph :
     def isCyclic(self) :
         """Return true if the graph has cycle (reentrant arcs are not considerate as cycle).
         """
-        return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1 or self.isReentrant()
+        return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1 or self.isReEntrant()
 
     def strTask(self, task):
         """Return a string which represent a task.
         """
-        s="TASK : "+str(task)+" RF:"+str(self.getRepetitionFactor(task))+" Degree:"+str(self.getDegree(task))+" in:"+str(self.getInputDegree(task))+" out:"+str(self.getOutputDegree(task))+"\n"
-        s+="\tPhase count : "+str(self.getPhaseCount(task))+" Duration : "+str(self.getPhaseDuration(task))+"\n"
+        s = "TASK : " + str(task) + " RF:" + str(self.getRepetitionFactor(task)) + " Degree:" + str(self.getDegree(task)) + " in:" + str(self.getInputDegree(task)) + " out:" + str(self.getOutputDegree(task)) + "\n"
+        s += "\tPhase count : " + str(self.getPhaseCount(task)) + " Duration : " + str(self.getPhaseDuration(task)) + "\n"
         if self.isThresholded() and self.getPhaseCountInit(task) > 0 :
-            s+="\tInitial phase count: "+str(self.getPhaseCountInit(task))+" Duration : "+str(self.getPhaseDurationInit(task))
+            s += "\tInitial phase count: " + str(self.getPhaseCountInit(task)) + " Duration : " + str(self.getPhaseDurationInit(task))
         return s
 
     def printTasks(self):
@@ -1327,22 +1327,22 @@ class Graph :
     def strArc(self, arc):
         """Return a string which represent an arc.
         """
-        s="ARC : "+str(arc[0])+"->"+str(arc[1])+" M0:"+str(self.getInitialMarking(arc))+" Token size:"+str(self.getTokenSize(arc))+"\n"
+        s = "ARC : " + str(arc[0]) + "->" + str(arc[1]) + " M0:" + str(self.getInitialMarking(arc)) + " Token size:" + str(self.getTokenSize(arc)) + "\n"
 
         initProdStr = ""
         prodStr = self.getProdStr(arc).replace(".0", "")
         if ";" in prodStr :
             initProdStr, prodStr = prodStr.split(";")
-            initProdStr = "("+str(initProdStr)+")"
-        s+="\tProd : "+str(initProdStr)+"["+str(prodStr)+"]"
-        s+="\n"
+            initProdStr = "(" + str(initProdStr) + ")"
+        s += "\tProd : " + str(initProdStr) + "[" + str(prodStr) + "]"
+        s += "\n"
         
         initConsStr = ""
         consStr = self.getConsStr(arc).replace(".0", "")
         if ";" in consStr :
             initConsStr, consStr = consStr.split(";")
-            initConsStr = "("+str(initConsStr)+")"
-        s+="\tCons : "+str(initConsStr)+"["+str(consStr)+"]"
+            initConsStr = "(" + str(initConsStr) + ")"
+        s += "\tCons : " + str(initConsStr) + "[" + str(consStr) + "]"
         
         return s
 
@@ -1356,19 +1356,19 @@ class Graph :
         """Print all buffers (initial marking) of the graph.
         """
         for arc in self.getArcList():
-            print str(arc)+" M0:"+str(self.getInitialMarking(arc))
+            print str(arc) + " M0:" + str(self.getInitialMarking(arc))
 
     def isMultigraph(self):
         """Return True if the graph is a multigraph 
         (i.e. of there exist two arc from a task to another). 
         """
         for arc in self.getArcList():
-            source, target = self.getSource(arc),self.getTarget(arc)
-            if len(self.getArcList(source = source, target = target)) > 1:
+            source, target = self.getSource(arc), self.getTarget(arc)
+            if len(self.getArcList(source=source, target=target)) > 1:
                 return True
         return False
 
-    def isReentrant(self):
+    def isReEntrant(self):
         """Return True if the graph is reentrant 
         (i.e. if there is at least one arc such as the source and the target are the same task)
         """
@@ -1390,10 +1390,10 @@ class Graph :
                 refValue = sum(self.getConsList(self.getInputArcList(task)[0]))
                 
             for arc in self.getOutputArcList(task):
-                if sum(self.getProdList(arc)) !=  refValue :
+                if sum(self.getProdList(arc)) != refValue :
                     return False 
             for arc in self.getInputArcList(task):
-                if sum(self.getConsList(arc)) !=  refValue :
+                if sum(self.getConsList(arc)) != refValue :
                     return False 
         return True
 
@@ -1401,8 +1401,29 @@ class Graph :
         """Return True if the graph is consistent.
         """
         for arc in self.getArcList():
-            weighteSource = sum(self.getProdList(arc))*self.getRepetitionFactor(self.getSource(arc))
-            weighteTarget = sum(self.getConsList(arc))*self.getRepetitionFactor(self.getTarget(arc))
+            weighteSource = sum(self.getProdList(arc)) * self.getRepetitionFactor(self.getSource(arc))
+            weighteTarget = sum(self.getConsList(arc)) * self.getRepetitionFactor(self.getTarget(arc))
             if weighteSource != weighteTarget :
                 return False
+        return True
+    
+    def isBounded(self):
+        if self.isMultigraph() or self.isReEntrant():
+            return False
+        for arc in self.getArcList():
+            task1 = self.getSource(arc)
+            task2 = self.getTarget(arc)
+            l1 = len(self.getArcList(source=task1, target=task2))
+            l2 = len(self.getArcList(source=task2, target=task1))
+            if l1 == 1 and l2 == 0:
+                return False
+            if l2 == 1 and l1 == 0:
+                return False
+
+#         for i in xrange(len(self.getTaskList())):
+#             for j in xrange(i+1,len(self.getTaskList())):
+#                 t1 = self.getTaskList()[i]
+#                 t2 = self.getTaskList()[j]
+#                 l1 = len(self.getArcList(source = t1, target = t2))
+#                 l2 = len(self.getArcList(source = t2, target = t1))
         return True
