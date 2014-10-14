@@ -39,6 +39,30 @@ With fedora there is no `pyversions` tool (required by `python-glpk`). You can f
 Usage
 =======
 
+
+How to run Turbine
+-------
+
+There is no installation step, to use Turbine you just have to specify it in the PYTHONPATH environnement variable.
+As an example, to run the `examples/computeInitialMarking.py` script, in the root directory of turbine :
+```
+$ PYTHONPATH=`pwd`  ./turbine/examples/computeInitialMarking.py
+#################generated graph#################
+Graph : Test_of_PCG, Type : PCG
+Normalized : True, Multigraph : True, reentrant : True
+Number of tasks : 100
+Number of edges : 303
+Task incoming degree tot: 303, moy : 3
+Task outgoing degree tot: 303, moy : 3
+Task degree tot: 606, moy : 6
+Repetition factor tot : 504, moy : 5
+Phases tot : 298, moy : 2
+Tot initial marking : 128378.0
+Cycle detected !
+....
+```
+
+
 How to generate a dataflow using Python
 -------
 
