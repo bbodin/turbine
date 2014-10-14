@@ -2,6 +2,7 @@ import StringIO
 import sys
 
 from models.graph import Graph
+from algorithms.rv import computeRepetitionVector
 
 
 def write_tur_file(dataflow, fileName):
@@ -14,9 +15,9 @@ def write_tur_file(dataflow, fileName):
     output.write(str(dataflow.getTaskCount())+" "+str(dataflow.getArcCount())+"\n")
 
     output.write("#TASKS\n")
-    output.write("#Id repetition_factor phase_duration\n")
+    output.write("#Id phase_duration\n")
     for task in dataflow.getTaskList():
-        output.write(str(task)+" "+str(dataflow.getRepetitionFactor(task))+" ")
+        output.write(str(task)+" ")
         output.write(dataflow.getTaskDurationStr(task)+"\n")
 
     output.write("#ARCS\n")
@@ -42,9 +43,8 @@ def read_tur_file(fileName):
     nbTask, nbArc = __readline(openFile).split(" ")
     for i in xrange(int(nbTask)):
         line = __readline(openFile).replace("\n","")
-        taskName, Rt, strDur = line.split(" ")
+        taskName, strDur = line.split(" ")
         task = dataflow.addTask(taskName)
-        dataflow.setRepetitionFactor(task, int (Rt))
         if ";" in strDur :
             strInitDur, strDur = strDur.split(";")
             initDurList = [int(i) for i in strInitDur.split(",")]
@@ -111,6 +111,10 @@ def read_tur_file(fileName):
         if "PCG" in dataflowType :
             dataflow.setConsThresholdList(arc, consThreshold)
             
+
+    # Now the graph is full, we can generate the repetition factor
+    computeRepetitionVector(dataflow)
+
     return dataflow
 
 def __readline(openFile):
