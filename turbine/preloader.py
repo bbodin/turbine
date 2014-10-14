@@ -5,8 +5,7 @@ from param import parameters
 from generation import *
 from algorithms.rv import *
 from generation.generate import generate, generatePreload, __sumPreload
-from sdf3.parser import  write_sdf3_file ,  read_sdf3_file 
-
+from file_parser.sdf3_parser import  write_sdf3_file ,  read_sdf3_file 
 ################# MAIN PARAMETERS AND FUNCTIONS  #######################
 
 main_parameters = parameters.Parameters()

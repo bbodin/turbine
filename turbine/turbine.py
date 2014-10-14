@@ -4,7 +4,7 @@ import getopt, sys
 from param import parameters
 from generation import *
 from generation.generate import generate
-from sdf3.parser import  write_sdf3_file 
+from file_parser.sdf3_parser import  write_sdf3_file 
 
 ################# MAIN PARAMETERS AND FUNCTIONS  #######################
 

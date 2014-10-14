@@ -2,7 +2,7 @@
 
 import getopt, sys
 from param import parameters
-from sdf3.parser import  write_sdf3_file ,  read_sdf3_file 
+from file_parser.sdf3_parser import  write_sdf3_file ,  read_sdf3_file 
 
 ################# MAIN PARAMETERS AND FUNCTIONS  #######################
 
