@@ -1309,10 +1309,12 @@ class Graph :
         """
         return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1 or self.isReEntrant()
 
+    def getTaskName(self, task):
+        return self.nxg.node[task][self.CONST_TASK_NAME]
     def strTask(self, task):
         """Return a string which represent a task.
         """
-        s = "TASK : " + str(task) + " RF:" + str(self.getRepetitionFactor(task)) + " Degree:" + str(self.getDegree(task)) + " in:" + str(self.getInputDegree(task)) + " out:" + str(self.getOutputDegree(task)) + "\n"
+        s = "TASK : " + str(self.getTaskName(task)) + " (" + str(task) + ") RF:" + str(self.getRepetitionFactor(task)) + " Degree:" + str(self.getDegree(task)) + " in:" + str(self.getInputDegree(task)) + " out:" + str(self.getOutputDegree(task)) + "\n"
         s += "\tPhase count : " + str(self.getPhaseCount(task)) + " Duration : " + str(self.getPhaseDuration(task)) + "\n"
         if self.isThresholded() and self.getPhaseCountInit(task) > 0 :
             s += "\tInitial phase count: " + str(self.getPhaseCountInit(task)) + " Duration : " + str(self.getPhaseDurationInit(task))
@@ -1427,3 +1429,18 @@ class Graph :
 #                 l1 = len(self.getArcList(source = t1, target = t2))
 #                 l2 = len(self.getArcList(source = t2, target = t1))
         return True
+    def printDOT(self):
+        dotfile  = "digraph application {\n"
+        dotfile += "node  [  ]\n"
+        dotfile += "ratio=\"fill\";\n"
+        dotfile += "size=\"8.3,11.7!\";\n"
+        dotfile += "margin=0;\n"
+
+        for task in self.getTaskList() :
+            dotfile +=  "%s [label=\"%s\",shape=box,style=filled,color=\".3 .3 1.0\"];\n" %(task,self.nxg.node[task][self.CONST_TASK_NAME])
+        for arc in self.getArcList():
+            source, target = self.getSource(arc), self.getTarget(arc)
+            dotfile +=  "%s -> %s\n" % (source,target)
+
+        dotfile += "}\n"
+        return dotfile

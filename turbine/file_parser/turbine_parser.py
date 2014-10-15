@@ -43,7 +43,11 @@ def read_tur_file(fileName):
     nbTask, nbArc = __readline(openFile).split(" ")
     for i in xrange(int(nbTask)):
         line = __readline(openFile).replace("\n","")
-        taskName, strDur = line.split(" ")
+        try :
+            taskName, strDur = line.split(" ")
+        except ValueError :
+            print "ERROR : [%s] does not respect the prototype [taskname duration]." % line
+            raise ValueError
         task = dataflow.addTask(taskName)
         if ";" in strDur :
             strInitDur, strDur = strDur.split(";")
@@ -57,7 +61,11 @@ def read_tur_file(fileName):
 
     for i in xrange(int(nbArc)):
         line = __readline(openFile).replace("\n","")
-        strArc, strM0, strProd, strCons = line.split(" ")
+        try :
+            strArc, strM0, strProd, strCons = line.split(" ")
+        except ValueError :
+            print "ERROR : [%s] does not respect the prototype [strArc strM0 strProd strCons]." % line
+            raise ValueError 
         source = dataflow.getTaskByName(strArc.split(",")[0][1:])
         target = dataflow.getTaskByName(strArc.split(",")[1][:-1])
         M0 = int (strM0)
