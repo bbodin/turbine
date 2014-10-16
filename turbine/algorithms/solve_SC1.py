@@ -245,7 +245,7 @@ class SolverSC1 :
     def __addFRow(self, row, arc, step):
         self.varRow[self.k] = row
         self.varCol[self.k] = self.colFM0[arc]
-        self.varCoef[self.k] = step
+        self.varCoef[self.k] = float(step)
         self.k += 1
 
         self.varRow[self.k] = row
