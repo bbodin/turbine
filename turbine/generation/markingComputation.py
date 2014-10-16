@@ -27,6 +27,8 @@ def generateInitialMarking(graph, solver="auto", GLPKVerbose=False, LPFileName=N
         solver = SolverSC2(graph, GLPKVerbose, LPFileName)
     elif solver == "SC1" :
         solver = SolverSC1(graph, GLPKVerbose, LPFileName)
+    elif solver == "None":
+        return
     elif solver == "auto" :
         if __SC2RowCount(graph) < __SC1RowCount(graph) :
             solver = SolverSC2(graph, GLPKVerbose, LPFileName)
@@ -123,82 +125,3 @@ def __calcReEntrant(graph):
                 logging.debug("Reentrant initial marking for arc : " + str(arc) + " : " + str(retMax))
 
     return M0tot
-
-
-# def __generateNewDFToolsPreload(graph):
-#     #Pour chaque noeud du graphe
-#     #   Pour chaque arc entrant dans la meme composante connexe
-#     #        Q = taux de production * Vecteur de repetition
-#     #   On retire le noeud
-#     #~ print "Begin generateDFToolsPreload -"
-#     for dst in graph.getTaskList() :
-#         SCC = strongly_connected_components_with_empty(graph,dst)
-#         for src in SCC :
-#             for edge in graph.getArcList(source=src,target=dst) : 
-#                 N = graph.getRepetitionFactor(src) * sum(graph.getProdList(edge))
-#                 graph.setInitialMarking(edge,N)
-#                 #print  "  Add preload %d" % N
-#     return
-# 
-# 
-# def __generateDFToolsPreload(graph):
-#     #Pour chaque noeud du graphe
-#     #   Pour chaque arc entrant dans la meme composante connexe
-#     #        Q = taux de production * Vecteur de repetition
-#     #   On retire le noeud
-#     #~ print "Begin generateDFToolsPreload -"
-#     for dst in graph.getTaskList() :
-#         SCC = tarjan_empty_recursive(graph,dst)
-#         for src in SCC :
-#             for edge in graph.getArcList(source=src,target=dst) : 
-#                 N = graph.getRepetitionFactor(src) * graph.getProdList(edge)[0]
-#                 graph.setInitialMarking(edge,N)
-#                 #print  "  Add preload %d" % N
-#     return
-# 
-# 
-# def __generateSDF3Preload(graph):
-# 
-#     # step 1 - recheche d'un cycle de depart
-#     arc = getArcInEmptyCycle(graph) 
-#     while arc != None : # step 2 - tant qu'il y a un cycle
-#         a = graph.getSource(arc)
-#         b = graph.getTarget(arc)
-#         #print "un cycle de plus avec %d jetons" %  __sumPreload(graph)
-#         for edge in graph.getArcList(source=a,target=b) :  # Pour l'ensemble des canaux entre a et b
-#             
-#             # On ajoute N jetons dans ce canal avec 
-#             # N = RV[a] * le taux de production dans l'arc
-#             # plutot que de supprimer l'arc comme prevu, on ignorera les arc avec jeton
-# 
-#             N = graph.getRepetitionFactor(a) * graph.getProdList(edge)[0]
-#             graph.setInitialMarking(edge,N)
-#         arc = getArcInEmptyCycle(graph) 
-# 
-#     # Step 3 - on termine sur une execution symbolique pour melanger les jeton
-#     # TODO - Pas fait !
-#         
-#     
-# def __generateNewSDF3Preload(realgraph):
-#     fakegraph = copy.deepcopy(realgraph)
-# 
-#     # step 1 - recheche d'un cycle de depart
-#     arc = getArcInCycle(fakegraph) 
-#     while arc != None : # step 2 - tant qu'il y a un cycle
-#         a = fakegraph.getSource(arc)
-#         b = fakegraph.getTarget(arc)
-#         #print "un cycle de plus avec %d jetons" %  __sumPreload(realgraph)
-#         for edge in list(fakegraph.getArcList(source=a,target=b)) :  # Pour l'ensemble des canaux entre a et b
-#             
-#             # On ajoute N jetons dans ce canal avec 
-#             # N = RV[a] * le taux de production dans l'arc
-#             # plutot que de supprimer l'arc comme prevu, on ignorera les arc avec jeton
-# 
-#             N = realgraph.getRepetitionFactor(a) * sum(realgraph.getProdList(edge))
-#             realgraph.setInitialMarking(edge,N)
-#             fakegraph.removeArc(edge)
-#         arc = getArcInCycle(fakegraph) 
-# 
-#     # Step 3 - on termine sur une execution symbolique pour melanger les jeton
-#     # TODO - Pas fait !
-#         

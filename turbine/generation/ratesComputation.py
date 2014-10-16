@@ -2,7 +2,9 @@ from math import floor
 from random import shuffle, random, sample, randint
 import logging
 
-from models.gcd import gcdList, gcd
+import numpy
+
+from models.gcd import gcdList
 from models.lcm import lcm
 
 
@@ -19,7 +21,6 @@ def constrained_sum_sample_pos(n, total):
     n : The size of the random list return.
     total : The sum of the list return
     """
-
     if total < n :
         x = [0] * (n - total) + [1] * total
         shuffle(x)
@@ -35,7 +36,7 @@ def constrained_sum_sample_pos(n, total):
     i = 0L
     dividers = sample(xrange(total), n - 1)
     dividers.sort()
-    return [a - b for a, b in zip(dividers + [total], [0] + dividers)]
+    return [int(a - b) for a, b in zip(dividers + [total], [0] + dividers)]
 
 
 ########################################################################
@@ -55,28 +56,23 @@ def __generateRV(graph, c_param):
     logging.info("Generate repetition vector")
     sumRV = c_param.getAverageRepetitionFactor() * graph.getTaskCount()  # Sum of the repetition vector
 
-    RVList = []
-    RVTot = 0
     gcdValue = 0
-    # Repetition factor are randomly selected 
-    for i in xrange(0, graph.getTaskCount()):
-        # ~ RV = gaussRandomSelection(1,2*c_param.getAverageRepetitionFactor()-1)
-        RV = randint(1, 2 * c_param.getAverageRepetitionFactor() - 1)
-        gcdValue = gcd(gcdValue, RV)
-        RVList.append(RV)
-        RVTot += RV
 
-    # If a problem occurred the list is readjusted
-    if RVTot > sumRV :
-        for i in xrange(0, RVTot - sumRV):
-            if RVList[i % graph.getTaskCount()] > 1 :
-                RVList[i % graph.getTaskCount()] -= 1
-                RVTot -= 1
-    else :
-        # The program should never go here or your sum of the repetition vector is too small
-        for i in xrange(0, sumRV - RVTot):
-            RVList[i % graph.getTaskCount()] += 1
-            RVTot += 1
+    n = graph.getTaskCount()
+    div = numpy.random.exponential(0.25)
+    div =  n+int(div*n)
+    RVList = numpy.random.multinomial(sumRV, numpy.ones(n)/div)
+
+    for rvRang in xrange(len(RVList)):#A modifier
+        if RVList[rvRang] == 0:
+            rang=0
+            go = True
+            while go :
+                if RVList[rang] > 1:
+                    RVList[rang]-=1
+                    go = False
+                rang+=1
+            RVList[rvRang]+=1
 
     # Modify the two last integers of the list to get a gcd equal to 1
     if gcdValue != 1 :
@@ -86,12 +82,11 @@ def __generateRV(graph, c_param):
             RVList[-2] += 1
 
     shuffle(RVList)
-
     for task in graph.getTaskList() :
         graph.setRepetitionFactor(task, RVList[task])
     return
 
-def __generatePhaseLists(graph, c_param):    
+def __generatePhaseLists(graph, c_param):
     """Generate weights of the dataflow.
     """
     logging.info("Generate task phase lists")
@@ -101,7 +96,6 @@ def __generatePhaseLists(graph, c_param):
     for  task in graph.getTaskList():
         lcmValue = lcm(lcmValue, graph.getRepetitionFactor(task))
 
-    # ~ start = time.time()
     for task in graph.getTaskList():
         phaseCount = randint(c_param.getMinPhaseCount(), c_param.getMaxPhaseCount())
         Zi = lcmValue / graph.getRepetitionFactor(task)
@@ -119,8 +113,6 @@ def __generatePhaseLists(graph, c_param):
             prodList = constrained_sum_sample_pos(phaseCount, Zi)
             graph.setProdList(arc, prodList)
             if sum(graph.getProdList(arc)) != Zi :
-                print graph.getProdList(arc)
-                print Zi
                 logging.fatal("constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
                 raise Error("__generatePhaseLists", "constrained_sum_sample_pos return wrong list, it's generally cause by too large number.")
             
