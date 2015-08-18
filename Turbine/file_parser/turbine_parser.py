@@ -6,7 +6,7 @@ from Turbine.graph_classe.pcg import PCG
 from Turbine.graph_classe.sdf import SDF
 
 
-def write_tur_file(dataflow, filename):
+def write_tur(dataflow):
     output = StringIO.StringIO()
 
     output.write("#Graph_name\n")
@@ -29,12 +29,16 @@ def write_tur_file(dataflow, filename):
         output.write(str(int(dataflow.get_initial_marking(arc)))+" ")
         output.write(dataflow.get_prod_str(arc)+" ")
         output.write(dataflow.get_cons_str(arc)+"\n")
-        
+    r = output.getvalue()  
+    output.close()
+    return r
+
+def write_tur_file(dataflow, fileName):
+    output = write_tur(dataflow)        
     open_file = sys.stdout
     if filename is not None:
         open_file = open(filename, "w")
-    open_file.write(output.getvalue())
-    output.close()
+    open_file.write(output)
     open_file.close()
 
 

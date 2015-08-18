@@ -231,7 +231,7 @@ class CSDF(Dataflow):
         ----------
         :rtype : str
         """
-        result = str([int(i) for i in self.get_phase_duration_list(task)])[1:-1]
+        result = str([float(i) for i in self.get_phase_duration_list(task)])[1:-1]
         return result.replace(" ", "")
 
     ########################################################################

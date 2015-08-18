@@ -288,7 +288,20 @@ def parse_sdf3_node(root, name):
 
     return dataflow
 
-
+def gen_sdf3_csdfProperties (dataflow) :
+    csdfp = ElementTree.Element("csdfProperties")  
+    for task in dataflow.get_task_list():
+        exetime = ElementTree.Element("executionTime")
+        exetime.set("time", dataflow.get_duration_str(task))
+        processor = ElementTree.Element("processor")
+        processor.set("type", 'cluster_0')
+        processor.set("default", 'true')
+        processor.append(exetime)
+        t = ElementTree.Element("actorProperties")
+        t.set("actor", str(dataflow.get_task_name(task)))
+        t.append(processor)
+        csdfp.append(t)
+    return csdfp
 def gen_sdf3_sdf_properties(dataflow):
     sdfp = ElementTree.Element("sdfProperties")  
     for task in dataflow.get_task_list():
@@ -322,6 +335,33 @@ def gen_sdf3_out_port(dataflow, arc):
     port.set("rate", str(dataflow.get_prod_str(arc)))
     return port
 
+def gen_sdf3_csdf (dataflow) :
+    csdf = ElementTree.Element("csdf")  
+    csdf.set("name", dataflow.get_name())
+    csdf.set("type", dataflow.get_name())
+    for task in dataflow.get_task_list():
+        t = ElementTree.Element("actor")  
+        t.set("name", dataflow.get_task_name(task))
+        t.set("type", "actor")
+        for c in dataflow.get_arc_list(target=task):
+            t.append(gen_sdf3_in_port(dataflow, c))
+        for c in dataflow.get_arc_list(source=task):
+            t.append(gen_sdf3_out_port(dataflow, c))
+        csdf.append(t)
+    # <channel name='channel_0' srcActor='A' srcPort='in_channel_0'
+    # ... dstActor='B' dstPort='out_0' size='1' initialTokens='0'/>
+    for channel in dataflow.get_arc_list():
+        c = ElementTree.Element("channel")  
+        c.set("name", dataflow.get_arc_name(channel))
+        c.set("srcActor", str(dataflow.get_task_name(dataflow.get_source(channel))))
+        c.set("srcPort", str(dataflow.get_prod_port_name(channel)))
+        c.set("dstActor", str(dataflow.get_task_name(dataflow.get_target(channel))))
+        c.set("dstPort", str(dataflow.get_cons_port_name(channel)))
+        c.set("size", str(dataflow.get_token_size(channel)))
+        c.set("initialTokens", str(dataflow.get_initial_marking(channel)))
+        csdf.append(c)
+    return csdf
+
 
 def gen_sdf3_sdf(dataflow):
     sdf = ElementTree.Element("sdf")  
@@ -351,14 +391,6 @@ def gen_sdf3_sdf(dataflow):
     return sdf
 
 
-def gen_sdf3_application_graph(dataflow):
-    ag = ElementTree.Element("applicationGraph")
-    ag.set("name", dataflow.get_name())
-    ag.append(gen_sdf3_sdf(dataflow))
-    ag.append(gen_sdf3_sdf_properties(dataflow))
-    return ag
-
-
 def gen_sdf3_node(dataflow):
     root = ElementTree.Element("sdf3")
     if isinstance(dataflow, SDF):
@@ -370,7 +402,17 @@ def gen_sdf3_node(dataflow):
     root.set("version", "1.0")
     root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
     root.set("xsi:noNamespaceSchemaLocation", "http://www.es.ele.tue.nl/sdf3/xsd/sdf3-csdf.xsd")
-    root.append(gen_sdf3_application_graph(dataflow))
+
+    ag = ElementTree.Element("applicationGraph")
+    ag.set("name", dataflow.get_name())
+    if isinstance(dataflow, SDF):
+        ag.append(gen_sdf3_sdf(dataflow))
+        ag.append(gen_sdf3_sdf_properties(dataflow))
+    else :
+        ag.append(gen_sdf3_csdf(dataflow))
+        ag.append(gen_sdf3_csdf_properties(dataflow))
+    root.append(ag)
+
     return root
 
 
