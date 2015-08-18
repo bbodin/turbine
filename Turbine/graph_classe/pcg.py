@@ -291,9 +291,9 @@ class PCG(CSDF):
         """
         result = ""
         if self.get_phase_count(task) > 0:
-            result = str([float(i) for i in self.get_phase_duration_list(task)])[1:-1]
+            result = str([int(i) for i in self.get_phase_duration_list(task)])[1:-1]
         if self.get_ini_phase_count(task) > 0:
-            ini = str([float(i) for i in self.get_ini_phase_duration_list(task)])[1:-1]
+            ini = str([int(i) for i in self.get_ini_phase_duration_list(task)])[1:-1]
             if len(ini) > 0:
                 return (str(ini) + ";" + str(result)).replace(" ", "")
             else:

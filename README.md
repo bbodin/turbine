@@ -51,9 +51,9 @@ How to run Turbine
 -------
 
 There is no installation step, to use Turbine you just have to specify it in the PYTHONPATH environnement variable.
-As an example, to run the `examples/computeInitialMarking.py` script, in the root directory of turbine :
+As an example, to run the `examples/compute_initial_marking.py` script, in the root directory of turbine :
 ```
-$ PYTHONPATH=`pwd`  ./turbine/examples/compute_initial_marking.py
+$ PYTHONPATH=`pwd`  ./Turbine/examples/compute_initial_marking.py
 #################generated graph#################
 ###### Setup the SDF generation #####
 ###### Generate dataflow ############
