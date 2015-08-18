@@ -40,6 +40,8 @@ With fedora there is no `pyversions` tool (required by `python-glpk`). You can f
 `pkg-config --cflags --libs python2`
 ```
 
+To test if the installation is ok run basic_test.py located on the root of turbine.
+Please, report any trouble at youen.lesparre@lip6.fr .
 
 Usage
 =======
@@ -51,19 +53,17 @@ How to run Turbine
 There is no installation step, to use Turbine you just have to specify it in the PYTHONPATH environnement variable.
 As an example, to run the `examples/computeInitialMarking.py` script, in the root directory of turbine :
 ```
-$ PYTHONPATH=`pwd`  ./turbine/examples/computeInitialMarking.py
+$ PYTHONPATH=`pwd`  ./turbine/examples/compute_initial_marking.py
 #################generated graph#################
-Graph : Test_of_PCG, Type : PCG
-Normalized : True, Multigraph : True, reentrant : True
-Number of tasks : 100
-Number of edges : 303
-Task incoming degree tot: 303, moy : 3
-Task outgoing degree tot: 303, moy : 3
-Task degree tot: 606, moy : 6
-Repetition factor tot : 504, moy : 5
-Phases tot : 298, moy : 2
-Tot initial marking : 128378.0
-Cycle detected !
+###### Setup the SDF generation #####
+###### Generate dataflow ############
+name: SDF_of_test
+task count: 10 arc count: 30
+tot initial marking: 0
+###### Compute the initial marking ##
+name: SDF_of_test
+task count: 10 arc count: 30
+tot initial marking: 6714
 ....
 ```
 
@@ -75,22 +75,20 @@ How to generate a dataflow using Python
 import turbine
 
 param= param.parameters.Parameters()
-param.setNbTask(100)
 
-graph = generate(param)
-write_sdf3_file(graph, fileName = "fileName.sdf3")
+dataflow = generate(param)
+write_sdf3_file(dataflow, filename = "fileName.sdf3")
 
 ```
 
-Then a SDF3 XML file `fileName.sdf3` will be created in current directory.
+Then a SDF3 XML file `filename.sdf3` will be created in current directory.
 
 How to see the generated linear program used to compute the inital marking
 --------
 
 ```
 param= param.parameters.Parameters()
-param.setNbTask(100)
-param.setLPFileName(test.lp)
+param.set_lp_filename(test.lp)
 
 generate(param)
 ```
