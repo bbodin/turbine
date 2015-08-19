@@ -44,9 +44,9 @@ def str_to_doubleint(rate):
 def split_init_cyclo_durations(durations):
     initcyclo = durations.split(';')
     if len(initcyclo) > 2:
-        raise BaseException("Bad rate format")         
+        raise BaseException("Bad rate format")
     if len(initcyclo) == 0:
-        raise BaseException("Empty rate format")   
+        raise BaseException("Empty rate format")
     initcyclo.insert(0, '')
     cyclo = initcyclo.pop()
     init = initcyclo.pop()
@@ -61,7 +61,7 @@ def split_init_cyclo_rates(rates):
     initcyclo = rates.split(';')
 
     if len(initcyclo) > 2:
-        raise BaseException("Bad rate format")         
+        raise BaseException("Bad rate format")
     if len(initcyclo) == 0:
         raise BaseException("Empty rate format")
 
@@ -103,7 +103,7 @@ def split_init_cyclo_rates(rates):
 # </actorProperties>
 def parse_sdf3_actor_properties(elem, dataflow, task_ref):
     for p in elem.getiterator("actorProperties"):  # get the first one, don't care default value
-        for e in p .getiterator("executionTime"):
+        for e in p.getiterator("executionTime"):
             chaine = e.get("time")
             if chaine is not None:
                 # 1;3,1 ==>  setPhaseDurationInitList([1]) && setPhaseDurationList([3,1]) 
@@ -141,7 +141,7 @@ def parse_sdf3_sdf_properties(elem, dataflow):
 # <port type='out' name='in_channel_0' rate='3,5'/>
 # </actor>
 def parse_sdf3_actor(task, dataflow):
-    taskname = task.get("name")      
+    taskname = task.get("name")
     task_ref = dataflow.get_task_by_name(taskname)
     for port in task.getiterator("port"):
         if port.get("rate") is None:
@@ -187,7 +187,6 @@ def parse_sdf3_actor(task, dataflow):
 # dstActor='B' dstPort='out_channel_0' size='1' initialTokens='0'/>
 # </sdf>
 def parse_sdf3_sdf(elem, dataflow):
-
     # Check input value
     if elem.tag != "sdf":
         if elem.tag != "csdf":
@@ -210,7 +209,7 @@ def parse_sdf3_sdf(elem, dataflow):
             raise BaseException()
         dataflow.set_prod_port_name(channel_ref, channel.get("srcPort"))
         dataflow.set_cons_port_name(channel_ref, channel.get("dstPort"))
-      
+
     # Read rates from task list
     for task in elem.getiterator("actor"):
         parse_sdf3_actor(task, dataflow)
@@ -224,7 +223,6 @@ def parse_sdf3_sdf(elem, dataflow):
 # </sdfProperties>
 # </applicationGraph>
 def parse_sdf3_application_graph(elem, dataflow):
-
     # Check input value
     if elem.tag != "applicationGraph":
         raise BaseException()
@@ -269,7 +267,6 @@ def parse_sdf3_application_graph(elem, dataflow):
 # </applicationGraph>
 # </sdf3>
 def parse_sdf3_node(root, name):
-
     # Check input value
     if root.tag != "sdf3":
         raise BaseException()
@@ -288,6 +285,7 @@ def parse_sdf3_node(root, name):
 
     return dataflow
 
+
 def gen_sdf3_csdf_properties (dataflow) :
     csdfp = ElementTree.Element("csdfProperties")  
     for task in dataflow.get_task_list():
@@ -303,8 +301,9 @@ def gen_sdf3_csdf_properties (dataflow) :
         csdfp.append(t)
     return csdfp
 
+
 def gen_sdf3_sdf_properties(dataflow):
-    sdfp = ElementTree.Element("sdfProperties")  
+    sdfp = ElementTree.Element("sdfProperties")
     for task in dataflow.get_task_list():
         exetime = ElementTree.Element("executionTime")
         exetime.set("time", dataflow.get_duration_str(task))
@@ -321,7 +320,7 @@ def gen_sdf3_sdf_properties(dataflow):
 
 # <port type='in' name='out_channel_2' rate='6'/>
 def gen_sdf3_in_port(dataflow, arc):
-    port = ElementTree.Element("port")  
+    port = ElementTree.Element("port")
     port.set("type", "in")
     port.set("name", str(dataflow.get_cons_port_name(arc)))
     port.set("rate", str(dataflow.get_cons_str(arc)))
@@ -330,18 +329,19 @@ def gen_sdf3_in_port(dataflow, arc):
 
 # <port type='out' name='out_channel_2' rate='6'/>
 def gen_sdf3_out_port(dataflow, arc):
-    port = ElementTree.Element("port")  
+    port = ElementTree.Element("port")
     port.set("type", "out")
     port.set("name", str(dataflow.get_prod_port_name(arc)))
     port.set("rate", str(dataflow.get_prod_str(arc)))
     return port
 
-def gen_sdf3_csdf (dataflow) :
-    csdf = ElementTree.Element("csdf")  
+
+def gen_sdf3_csdf(dataflow):
+    csdf = ElementTree.Element("csdf")
     csdf.set("name", dataflow.get_name())
     csdf.set("type", dataflow.get_name())
     for task in dataflow.get_task_list():
-        t = ElementTree.Element("actor")  
+        t = ElementTree.Element("actor")
         t.set("name", dataflow.get_task_name(task))
         t.set("type", "actor")
         for c in dataflow.get_arc_list(target=task):
@@ -352,7 +352,7 @@ def gen_sdf3_csdf (dataflow) :
     # <channel name='channel_0' srcActor='A' srcPort='in_channel_0'
     # ... dstActor='B' dstPort='out_0' size='1' initialTokens='0'/>
     for channel in dataflow.get_arc_list():
-        c = ElementTree.Element("channel")  
+        c = ElementTree.Element("channel")
         c.set("name", dataflow.get_arc_name(channel))
         c.set("srcActor", str(dataflow.get_task_name(dataflow.get_source(channel))))
         c.set("srcPort", str(dataflow.get_prod_port_name(channel)))
@@ -365,11 +365,11 @@ def gen_sdf3_csdf (dataflow) :
 
 
 def gen_sdf3_sdf(dataflow):
-    sdf = ElementTree.Element("sdf")  
+    sdf = ElementTree.Element("sdf")
     sdf.set("name", dataflow.get_name())
     sdf.set("type", dataflow.get_name())
     for task in dataflow.get_task_list():
-        t = ElementTree.Element("actor")  
+        t = ElementTree.Element("actor")
         t.set("name", dataflow.get_task_name(task))
         t.set("type", "actor")
         for c in dataflow.get_arc_list(target=task):
@@ -380,7 +380,7 @@ def gen_sdf3_sdf(dataflow):
     # <channel name='channel_0' srcActor='A' srcPort='in_channel_0'
     # ... dstActor='B' dstPort='out_0' size='1' initialTokens='0'/>
     for channel in dataflow.get_arc_list():
-        c = ElementTree.Element("channel")  
+        c = ElementTree.Element("channel")
         c.set("name", dataflow.get_arc_name(channel))
         c.set("srcActor", str(dataflow.get_task_name(dataflow.get_source(channel))))
         c.set("srcPort", str(dataflow.get_prod_port_name(channel)))
@@ -409,7 +409,7 @@ def gen_sdf3_node(dataflow):
     if isinstance(dataflow, SDF):
         ag.append(gen_sdf3_sdf(dataflow))
         ag.append(gen_sdf3_sdf_properties(dataflow))
-    else :
+    else:
         ag.append(gen_sdf3_csdf(dataflow))
         ag.append(gen_sdf3_csdf_properties(dataflow))
     root.append(ag)

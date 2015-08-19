@@ -104,10 +104,10 @@ class CSDF(Dataflow):
         task : the task targeted.
         :type phase_duration_list : list the list of phase duration of the task (integer).
         """
-        self.__verifyLength(task, len(phase_duration_list))
+        self.__verify_length(task, len(phase_duration_list))
         self.nxg.node[task][self.CONST_PHASE_DURATION_LIST] = phase_duration_list
 
-    def __verifyLength(self, task, length_list):
+    def __verify_length(self, task, length_list):
         """Compare the length of a list and the phase number of a task.
 
         Parameters
@@ -231,7 +231,7 @@ class CSDF(Dataflow):
         ----------
         :rtype : str
         """
-        result = str([float(i) for i in self.get_phase_duration_list(task)])[1:-1]
+        result = str([int(i) for i in self.get_phase_duration_list(task)])[1:-1]
         return result.replace(" ", "")
 
     ########################################################################
