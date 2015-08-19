@@ -288,7 +288,7 @@ def parse_sdf3_node(root, name):
 
     return dataflow
 
-def gen_sdf3_csdfProperties (dataflow) :
+def gen_sdf3_csdf_properties (dataflow) :
     csdfp = ElementTree.Element("csdfProperties")  
     for task in dataflow.get_task_list():
         exetime = ElementTree.Element("executionTime")
@@ -302,6 +302,7 @@ def gen_sdf3_csdfProperties (dataflow) :
         t.append(processor)
         csdfp.append(t)
     return csdfp
+
 def gen_sdf3_sdf_properties(dataflow):
     sdfp = ElementTree.Element("sdfProperties")  
     for task in dataflow.get_task_list():
