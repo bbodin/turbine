@@ -4,6 +4,7 @@ import networkx as nx
 
 from Turbine.algorithms.normalized import normalized_dataflow, un_normalized_dataflow
 from Turbine.algorithms.rv import compute_rep_vect
+from Turbine.algorithms.symbolic_exe import SymbolicExe
 from Turbine.generation.marking_computation import compute_initial_marking
 
 
@@ -32,7 +33,8 @@ class Dataflow(object):
         """
         self.name = name
         self.nxg = nx.MultiDiGraph(name=name)
-        self.taskKey = 0
+        self.task_key = 0
+        self.arc_key = 0
 
         self.taskByName = {}
         self.arcByName = {}
@@ -54,7 +56,7 @@ class Dataflow(object):
 
         :type name: basestring
         """
-        new_task = self.taskKey
+        new_task = self.task_key
         if name is None:
             name = "t" + str(new_task)
 
@@ -65,7 +67,7 @@ class Dataflow(object):
         except KeyError:
             pass
 
-        self.taskKey += 1
+        self.task_key += 1
         self.taskByName[name] = new_task
 
         self.nxg.add_node(new_task)
@@ -262,7 +264,8 @@ class Dataflow(object):
         self.set_cons_port_name(arc, "cons" + str(source) + "" + str(target) + "" + str(key))
         self.set_prod_port_name(arc, "prod" + str(source) + "" + str(target) + "" + str(key))
 
-        arc_name = "a" + str(key)
+        arc_name = "a" + str(self.arc_key)
+        self.arc_key += 1
 
         self.set_arc_name(arc, arc_name)
 
@@ -587,4 +590,15 @@ class Dataflow(object):
                 return False
             if l2 == 1 and l1 == 0:
                 return False
+        return True
+
+    @property
+    def is_dead_lock(self):
+        """
+
+        :return: True if the dataflow is live
+        """
+        se = SymbolicExe(self)
+        if se.execute() == 0:
+            return False
         return True
