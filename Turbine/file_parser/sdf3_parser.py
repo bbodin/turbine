@@ -339,7 +339,7 @@ def gen_sdf3_out_port(dataflow, arc):
 def gen_sdf3_csdf(dataflow):
     csdf = ElementTree.Element("csdf")
     csdf.set("name", dataflow.get_name())
-    csdf.set("type", dataflow.get_name())
+    csdf.set("type", str.lower(dataflow.get_dataflow_type()))
     for task in dataflow.get_task_list():
         t = ElementTree.Element("actor")
         t.set("name", dataflow.get_task_name(task))
@@ -367,7 +367,7 @@ def gen_sdf3_csdf(dataflow):
 def gen_sdf3_sdf(dataflow):
     sdf = ElementTree.Element("sdf")
     sdf.set("name", dataflow.get_name())
-    sdf.set("type", dataflow.get_name())
+    sdf.set("type", str.lower(dataflow.get_dataflow_type()))
     for task in dataflow.get_task_list():
         t = ElementTree.Element("actor")
         t.set("name", dataflow.get_task_name(task))
@@ -402,7 +402,12 @@ def gen_sdf3_node(dataflow):
         root.set("type", "pcg")
     root.set("version", "1.0")
     root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-    root.set("xsi:noNamespaceSchemaLocation", "http://www.es.ele.tue.nl/sdf3/xsd/sdf3-csdf.xsd")
+    xsd_name = "http://www.es.ele.tue.nl/sdf3/xsd/sdf3-"
+    if dataflow.is_sdf:
+        xsd_name += "sdf.xsd"
+    if dataflow.is_csdf:
+        xsd_name += "csdf.xsd"
+    root.set("xsi:noNamespaceSchemaLocation", xsd_name)
 
     ag = ElementTree.Element("applicationGraph")
     ag.set("name", dataflow.get_name())
