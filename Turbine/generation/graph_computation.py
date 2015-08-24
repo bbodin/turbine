@@ -94,7 +94,7 @@ def __generate_connex_dag(dataflow, c_param):
     if c_param.get_nb_task() < 10:
         path_nodes_nb = randint(1, int(math.ceil(c_param.get_nb_task() / 2.0)))
     else:
-        path_nodes_nb = int(c_param.get_nb_task() / randint(2, int(math.ceil(c_param.get_nb_task() / 2.0))))
+        path_nodes_nb = int(c_param.get_nb_task() / randint(2, int(c_param.get_nb_task() / 2)))
 
     path = []
     for _ in xrange(path_nodes_nb):
