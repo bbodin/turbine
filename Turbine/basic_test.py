@@ -19,8 +19,12 @@ print "Starting basic expe_old !"
 
 print ""
 
-print "SDF generation",
+print "Acyclic SDF generation",
 c_param = Parameters()
+c_param.set_acyclic(True)
+try_function(generate, ("Test_of_SDFG", c_param))
+print "Cyclic SDF generation",
+c_param.set_acyclic(False)
 SDF = try_function(generate, ("Test_of_SDFG", c_param))
 print "SDF Compute repetition vector",
 try_function(SDF.compute_repetition_vector, [])
@@ -54,8 +58,12 @@ try_function(SDF.get_period, [])
 
 print ""
 
-print "CSDF generation",
+print "Acyclic SDF generation",
 c_param.set_dataflow_type("CSDF")
+c_param.set_acyclic(True)
+try_function(generate, ("Test_of_CSDFG", c_param))
+print "Cyclic CSDF generation",
+c_param.set_acyclic(False)
 CSDF = try_function(generate, ("Test_of_CSDFG", c_param))
 print "CSDF Compute repetition vector",
 try_function(CSDF.compute_repetition_vector, [])
@@ -87,8 +95,12 @@ try_function(CSDF.compute_initial_marking, ("SC1_MIP", False, None, 1))
 
 print ""
 
-print "PCG generation",
+print "Acyclic PCG generation",
 c_param.set_dataflow_type("PCG")
+c_param.set_acyclic(True)
+try_function(generate, ("Test_of_PCG", c_param))
+print "Cyclic PCG generation",
+c_param.set_acyclic(False)
 PCG = try_function(generate, ("Test_of_PCGG", c_param))
 print "PCG Compute repetition vector",
 try_function(PCG.compute_repetition_vector, [])

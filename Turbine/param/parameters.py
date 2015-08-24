@@ -49,6 +49,9 @@ class Parameters:
         # True generate dataflow with re-entrant arc
         self.__REENTRANT = False
 
+        # True generate an acyclic dataflow
+        self.__ACYCLIC = False
+
         # ~~~~~~~~~~~~~~~~~~~~PRELOAD~SOLVER~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # Select the initial marking's solver
         self.__SOLVER = "Auto"
@@ -167,6 +170,13 @@ class Parameters:
         """
         self.__REENTRANT = bool(value)
 
+    def set_acyclic(self, value):
+        """
+
+        :type value: bool
+        """
+        self.__ACYCLIC = bool(value)
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~PRELOAD~SOLVER~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def set_solver(self, value):
         """Permit to choose between two solver for generate initial marking (from two sufficient conditions):
@@ -266,6 +276,11 @@ class Parameters:
         """Return True if the dataflow has at least one reentrant arc.
         """
         return self.__REENTRANT
+
+    def is_acyclic(self):
+        """Return True if the dataflow is acyclic.
+        """
+        return self.__ACYCLIC
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~PRELOAD~SOLVER~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def get_solver(self):
