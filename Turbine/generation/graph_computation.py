@@ -23,7 +23,7 @@ def generate_dataflow(dataflow_name, c_param):
         dataflow = CSDF(dataflow_name)
     if c_param.get_dataflow_type() == "PCG":
         dataflow = PCG(dataflow_name)
-    if c_param.is_acyclic:
+    if c_param.is_acyclic():
         path = __generate_connex_dag(dataflow, c_param)  # Generate a simple connex directed acyclic graph
         __generate_arcs_dag(dataflow, c_param, path)  # Add arcs
     else:
