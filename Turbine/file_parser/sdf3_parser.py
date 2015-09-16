@@ -228,7 +228,7 @@ def parse_sdf3_application_graph(elem, dataflow):
         raise BaseException()
 
     # Get name
-    if elem.get("name") is None:
+    if not elem.get("name") is None:
         dataflow.setName(elem.get("name"))
 
     # Read sdfProperties node (to do before sdf to resolve phase count and task)
@@ -286,8 +286,8 @@ def parse_sdf3_node(root, name):
     return dataflow
 
 
-def gen_sdf3_csdf_properties (dataflow) :
-    csdfp = ElementTree.Element("csdfProperties")  
+def gen_sdf3_csdf_properties(dataflow):
+    csdfp = ElementTree.Element("csdfProperties")
     for task in dataflow.get_task_list():
         exetime = ElementTree.Element("executionTime")
         exetime.set("time", dataflow.get_duration_str(task))
