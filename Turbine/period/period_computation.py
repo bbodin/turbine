@@ -1,7 +1,5 @@
 """
 Created on Jul 8, 2014
-
-@author: lesparre
 """
 from glpk import *
 import logging
@@ -81,8 +79,6 @@ class ComputePeriod:
     def __create_row(self):  # Add Row (constraint) on prob
         # Counting row
         row_count = self.dataflow.get_arc_count()
-        # # TEST
-        # row_count += self.dataflow.get_task_count()+1
 
         re_entrant_arc = 0
         for arc in self.dataflow.get_arc_list():
@@ -95,7 +91,6 @@ class ComputePeriod:
         glp_add_rows(self.prob, row_count)
 
         self.var_array_size = (self.dataflow.get_arc_count() - re_entrant_arc) * 3 + 1
-        # + self.dataflow.get_task_count() * 2
         logging.info("Var array size: " + str(self.var_array_size))
         self.var_row = intArray(self.var_array_size)
         self.var_col = intArray(self.var_array_size)
@@ -125,10 +120,6 @@ class ComputePeriod:
                 self.__add_start_row(row, source, target, n_coef, lti)
                 row += 1
 
-                # for task in self.dataflow.get_task_list():
-                #     self.__add_start_n_row(row, task)
-                #     row += 1
-
     def __solve_prob(self):  # Launch the solver and set preload of the graph
         logging.info("loading matrix ...")
         glp_load_matrix(self.prob, self.var_array_size - 1, self.var_row, self.var_col, self.var_coef)
@@ -140,8 +131,11 @@ class ComputePeriod:
         logging.info("solving problem ...")
         ret = str(glp_simplex(self.prob, self.glpkParam))
         logging.info("Solver return: " + ret)
-        for task in self.dataflow.get_task_list():
-            print "start time of task " + str(task) + " : " + str(glp_get_col_prim(self.prob, self.col_start[task]))
+
+        # Start date for each task
+        # for task in self.dataflow.get_task_list():
+        #     print "start time of task " + str(task) + " : " + str(glp_get_col_prim(self.prob, self.col_start[task]))
+
         return glp_get_col_prim(self.prob, self.N)
 
     # Add the variable N
@@ -189,19 +183,3 @@ class ComputePeriod:
 
         glp_set_row_bnds(self.prob, row, GLP_LO, lti, lti)
         glp_set_row_name(self.prob, row, "step" + str((source, target)))
-
-    # Add a constraint:
-    def __add_start_n_row(self, row, task):
-        self.var_row[self.k] = row
-        self.var_col[self.k] = self.col_start[task]
-        self.var_coef[self.k] = -1.0
-        self.k += 1
-
-        self.var_row[self.k] = row
-        self.var_col[self.k] = self.N
-        self.var_coef[self.k] = 1.0
-        self.k += 1
-
-        lt = self.dataflow.get_task_duration(task)
-        glp_set_row_bnds(self.prob, row, GLP_LO, lt, 0)
-        glp_set_row_name(self.prob, row, "N_cons" + str(task))
