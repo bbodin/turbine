@@ -1,6 +1,5 @@
 from fractions import gcd
-from math import floor
-from random import shuffle, random, randint
+from random import shuffle, randint, sample
 import logging
 
 import numpy
@@ -17,21 +16,17 @@ def constrained_sum_sample_pos(n, total):
 
     Parameters
     ----------
-    n: The size of the random list return.
-    total: The sum of the list return
+    n : The size of the random list return.
+    total : The sum of the list return
     """
     if total < n:
         x = [0] * (n - total) + [1] * total
         shuffle(x)
         return x
 
-    x = [0] * n
-    pan = total
-    for i in range(n - 1):
-        x[i] = int(floor(random() * pan))
-        pan -= x[i]
-    x[n - 1] = pan
-    return x
+    dividers = sample(xrange(total), n - 1)
+    dividers.sort()
+    return [int(a - b) for a, b in zip(dividers + [total], [0] + dividers)]
 
 
 ########################################################################
@@ -43,6 +38,7 @@ def generate_rates(dataflow, c_param):
     __generate_rv(dataflow, c_param)  # generate the repetition vector
     __generate_rates(dataflow, c_param)  # generate weight vectors
     if isinstance(dataflow, PCG):
+        __generate_threshold_lists(dataflow)
         __generate_initial_phase_lists(dataflow, c_param)  # generate initial vectors
 
 
@@ -122,26 +118,27 @@ def __generate_rates(dataflow, c_param):
                 if sum(dataflow.get_prod_rate_list(arc)) != zi:
                     logging.fatal("constrained_sum_sample_pos return wrong list, "
                                   "it's generally cause by too large number.")
-                    raise Exception("__generate_phase_lists",
-                                    "constrained_sum_sample_pos return wrong list, "
+                    raise Exception("__generate_phase_lists constrained_sum_sample_pos return wrong list, "
                                     "it's generally cause by too large number.")
 
             for arc in dataflow.get_arc_list(target=task):
                 cons_list = constrained_sum_sample_pos(phase_count, zi)
                 dataflow.set_cons_rate_list(arc, cons_list)
-                if isinstance(dataflow, PCG):
-                    cons_threshold_list = constrained_sum_sample_pos(phase_count, zi)
-                    dataflow.set_threshold_list(arc, cons_threshold_list)
                 if sum(dataflow.get_cons_rate_list(arc)) != zi:
-                    logging.fatal("constrained_sum_sample_pos return wrong list, "
-                                  "it's generally cause by too large number.")
-                    raise Exception("__generate_phase_lists",
-                                    "constrained_sum_sample_pos return wrong list, "
+                    raise Exception("__generate_phase_lists constrained_sum_sample_pos return wrong list, "
                                     "it's generally cause by too large number.")
 
         if dataflow.get_task_count() > 1000 and k % 1000 == 0:
             logging.info(str(k) + "/" + str(dataflow.get_task_count()) + " tasks weigth generation complete.")
         k += 1 
+
+
+def __generate_threshold_lists(dataflow):
+    for arc in dataflow.get_arc_list():
+        phase_count = dataflow.get_phase_count(dataflow.get_target(arc))
+        zi = sum(dataflow.get_cons_rate_list(arc))
+        threshold_list = constrained_sum_sample_pos(phase_count, zi)
+        dataflow.set_threshold_list(arc, threshold_list)
 
 
 def __generate_initial_phase_lists(dataflow, c_param):

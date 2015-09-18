@@ -48,6 +48,15 @@ class Dataflow(object):
         ret += "tot initial marking: " + str(tot)
         return ret
 
+    def set_name(self, name):
+        self.name = name
+
+    def draw(self):
+        nx.draw(self.nxg)
+        import matplotlib.pyplot as plt
+        plt.show()
+
+
     ########################################################################
     #                           add/modify tasks                           #
     ########################################################################
@@ -532,7 +541,7 @@ class Dataflow(object):
         return compute_rep_vect(self)
 
     def normalized(self):
-        normalized_dataflow(self)
+        return normalized_dataflow(self)
 
     def un_normalized(self, coef_vector=None):
         return un_normalized_dataflow(self, coef_vector=coef_vector)

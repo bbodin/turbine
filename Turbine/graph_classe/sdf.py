@@ -22,6 +22,11 @@ class SDF(Dataflow):
         """
         super(SDF, self).__init__(name=name)
 
+    def __str__(self):
+        ret = super(SDF, self).__str__()
+        ret += "\nNormalized: "+str(self.is_normalized)+"\n"
+        return ret
+
     def __eq__(self, other):
         for arc in self.get_arc_list():
             if self.get_cons_str(arc) != other.get_cons_str(arc):

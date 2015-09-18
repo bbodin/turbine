@@ -1,3 +1,4 @@
+from copy import copy
 import logging
 
 from glpk import *
@@ -226,7 +227,7 @@ class SolverSC2:
                 phase_count += self.dataflow.get_ini_phase_count(self.dataflow.get_target(arc_in))
                 prod_list = self.dataflow.get_ini_prod_rate_list(arc_out) + prod_list
                 cons_list = self.dataflow.get_ini_cons_rate_list(arc_in) + cons_list
-                threshold_list = self.dataflow.get_threshold_list(arc_in)
+                threshold_list = copy(self.dataflow.get_threshold_list(arc_in))
                 threshold_list += self.dataflow.get_ini_threshold_list(arc_in)
 
         if self.dataflow.is_sdf:

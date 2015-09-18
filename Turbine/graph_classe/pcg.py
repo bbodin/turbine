@@ -203,7 +203,7 @@ class PCG(CSDF):
             (default name=lowest unused integer).
         """
         try:
-            gcd_v = super(PCG, self)._calc_gcd(arc)
+            gcd_v = self.get_gcd(arc)
             if not self.get_ini_cons_rate_list == []:
                 gcd_v = reduce(gcd, self.get_ini_cons_rate_list(arc)+[gcd_v])
             if not self.get_ini_prod_rate_list == []:

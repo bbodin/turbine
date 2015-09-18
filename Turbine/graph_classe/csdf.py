@@ -21,6 +21,11 @@ class CSDF(Dataflow):
             """
         super(CSDF, self).__init__(name)
 
+    def __str__(self):
+        ret = super(CSDF, self).__str__()
+        ret += "\nNormalized: "+str(self.is_normalized)+"\n"
+        return ret
+
     def __eq__(self, other):
         for arc in self.get_arc_list():
             if self.get_cons_str(arc) != other.get_cons_str(arc):
@@ -247,11 +252,10 @@ class CSDF(Dataflow):
                 weight = sum(self.get_prod_rate_list(self.get_arc_list(source=task)[0]))
             except IndexError:
                 weight = sum(self.get_cons_rate_list(self.get_arc_list(target=task)[0]))
-
             for arc in self.get_arc_list(source=task):
-                if not sum(self.get_prod_rate_list(arc)) == weight:
+                if sum(self.get_prod_rate_list(arc)) != weight:
                     return False
             for arc in self.get_arc_list(target=task):
-                if not sum(self.get_cons_rate_list(arc)) == weight:
+                if sum(self.get_cons_rate_list(arc)) != weight:
                     return False
         return True

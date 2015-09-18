@@ -4,12 +4,6 @@ from Turbine.algorithms.solve_SC1 import SolverSC1
 from Turbine.algorithms.solve_SC1_Kc import SolverSC1Kc
 from Turbine.algorithms.solve_SC2 import SolverSC2
 
-try:
-    from Turbine.algorithms.solve_SC1_Gurobi_MIP import SolveSC1GuMIP
-    from Turbine.algorithms.solve_SC1_Gurobi_MIP_Kc import SolveSC1GuMIPKc
-except ImportError:
-    logging.info("Gurobi not detected...")
-
 
 def __sum_initial_marking(dataflow):
     tot = 0
@@ -24,6 +18,9 @@ def __sum_initial_marking(dataflow):
 def compute_initial_marking(dataflow, solver_str="Auto", solver_verbose=False, lp_filename=None, period=None):
     """Step 3
     """
+    if not dataflow.is_normalized:
+        raise Exception("Dataflow must be normalized first !")
+
     dataflow.del_initial_marking()
     if solver_str == "None" or solver_str is None:
         return
@@ -44,17 +41,20 @@ def compute_initial_marking(dataflow, solver_str="Auto", solver_verbose=False, l
             solver = SolverSC1Kc(dataflow, period, solver_verbose, lp_filename)
 
     elif solver_str == "SC1_MIP":
+        from Turbine.algorithms.solve_SC1_Gurobi_MIP import SolveSC1GuMIP
+        from Turbine.algorithms.solve_SC1_Gurobi_MIP_Kc import SolveSC1GuMIPKc
         solver = SolveSC1GuMIP(dataflow, solver_verbose, lp_filename)
         if period is not None:
             solver = SolveSC1GuMIPKc(dataflow, period, solver_verbose, lp_filename)
 
     else:
-        logging.error("solver: wrong argument")
-        return
+        raise Exception("Wrong solver argument: no solver called")
 
     solver.compute_initial_marking()
+
     m0tot = __calc_reentrant(dataflow)
     logging.info("Mem tot (reentrant): " + str(m0tot))
+    del solver
     
 
 def __cs2_row_count(dataflow):

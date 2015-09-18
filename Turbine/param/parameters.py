@@ -272,6 +272,11 @@ class Parameters:
         """        
         return self.__dataflow_TYPE
 
+    def is_normalized(self):
+        """Return True if the dataflow has at least one reentrant arc.
+        """
+        return self.__NORMALIZED
+
     def is_reentrant(self):
         """Return True if the dataflow has at least one reentrant arc.
         """

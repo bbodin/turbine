@@ -11,7 +11,7 @@ c_param.set_nb_task(100)
 
 print "###### Generate dataflow ############"
 dataflow = generate("SDF_of_test", c_param)  # Generate a SDF dataflow graph
+print dataflow
 
 print "###### Compute the symbolic execution to find dead lock ##"
-print dataflow.is_dead_lock
-print dataflow
+print "Is dead lock:", dataflow.is_dead_lock
