@@ -521,7 +521,7 @@ class Dataflow(object):
     ########################################################################
     #                        Graph Transformations                         #
     ########################################################################
-    def compute_initial_marking(self, solver_str="Auto", solver_verbose=False, lp_filename=None, period=1):
+    def compute_initial_marking(self, solver_str="Auto", solver_verbose=False, lp_filename=None, period=None):
         """Generate the initial marking of the graph such that it's became alive.
         Initial marking computation is handle by GLPK (freeware) a linear solver or GUROBI (free for university).
 
