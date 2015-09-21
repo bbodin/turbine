@@ -187,11 +187,11 @@ class SDF(Dataflow):
     ########################################################################
     @property
     def is_consistent(self):
-        """Return True if the graph is consistent.
+        """Return True if the sdf is consistent.
         """
         for arc in self.get_arc_list():
-            source_w = sum(self.get_prod_rate(arc)) * self.get_repetition_factor(self.get_source(arc))
-            target_w = sum(self.get_cons_rate(arc)) * self.get_repetition_factor(self.get_target(arc))
+            source_w = self.get_prod_rate(arc) * self.get_repetition_factor(self.get_source(arc))
+            target_w = self.get_cons_rate(arc) * self.get_repetition_factor(self.get_target(arc))
             if source_w != target_w:
                 return False
         return True

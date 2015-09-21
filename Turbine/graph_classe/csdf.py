@@ -23,7 +23,7 @@ class CSDF(Dataflow):
 
     def __str__(self):
         ret = super(CSDF, self).__str__()
-        ret += "\nNormalized: "+str(self.is_normalized)+"\n"
+        ret += "\nNormalized: " + str(self.is_normalized) + "\n"
         return ret
 
     def __eq__(self, other):
@@ -141,8 +141,8 @@ class CSDF(Dataflow):
         arc = super(CSDF, self).add_arc(source, target)
         source_pc = self.get_phase_count(source)
         target_pc = self.get_phase_count(target)
-        self.set_cons_rate_list(arc, [1]*target_pc)
-        self.set_prod_rate_list(arc, [1]*source_pc)
+        self.set_cons_rate_list(arc, [1] * target_pc)
+        self.set_prod_rate_list(arc, [1] * source_pc)
         return arc
 
     ########################################################################
@@ -166,7 +166,7 @@ class CSDF(Dataflow):
         :type cons_rate_list: list of integer
         """
         self._set_arc_attribute(arc, cons_rate_list, self.CONST_ARC_CONS_RATE_LIST)
-        self._calc_gcd(arc)
+        self.__calc_gcd(arc)
 
     def set_prod_rate_list(self, arc, prod_rate_list):
         """Set the consumption list of an arc.
@@ -179,9 +179,9 @@ class CSDF(Dataflow):
         :type prod_rate_list: list of integer
         """
         self._set_arc_attribute(arc, prod_rate_list, self.CONST_ARC_PROD_RATE_LIST)
-        self._calc_gcd(arc)
+        self.__calc_gcd(arc)
 
-    def _calc_gcd(self, arc):
+    def __calc_gcd(self, arc):
         """Calculate the GCD between the consumption weight list and the
         production weight list of an arc.
 
@@ -242,6 +242,17 @@ class CSDF(Dataflow):
     ########################################################################
     #                        PROPERTIES graph                              #
     ########################################################################
+    @property
+    def is_consistent(self):
+        """Return True if the csdf is consistent.
+        """
+        for arc in self.get_arc_list():
+            source_w = sum(self.get_prod_rate_list(arc)) * self.get_repetition_factor(self.get_source(arc))
+            target_w = sum(self.get_cons_rate_list(arc)) * self.get_repetition_factor(self.get_target(arc))
+            if source_w != target_w:
+                return False
+        return True
+
     @property
     def is_normalized(self):
         """:return : True if the graph is a normalized
