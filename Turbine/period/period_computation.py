@@ -23,14 +23,14 @@ class ComputePeriod:
         self.verbose = verbose
         self.lp_filename = lp_filename
 
-        self.N = 0  # Normalised period
+        self.K = 0  # Normalised period
         self.col_start = {}  # dict use for storing task's variable column
 
-    def compute_period(self):
+    def compute_period(self, print_start_time=False):
         self.__init_prob()  # Modify parameters
         self.__create_col()  # Add Col on prob
         self.__create_row()  # Add Row (constraint) on prob
-        ret = self.__solve_prob()  # Launch the solver and set preload of the graph
+        ret = self.__solve_prob(print_start_time)  # Launch the solver and set preload of the graph
         del self.prob  # Del prob
 
         f_task = self.dataflow.get_task_list()[0]
@@ -39,7 +39,6 @@ class ComputePeriod:
             z = self.dataflow.get_prod_rate(self.dataflow.get_arc_list(source=f_task)[0])
         except IndexError:
             z = self.dataflow.get_cons_rate(self.dataflow.get_arc_list(target=f_task)[0])
-
         return ret * z * rep_v
 
     def __init_prob(self):  # Modify parameters
@@ -68,7 +67,7 @@ class ComputePeriod:
         glp_add_cols(self.prob, col_count)
 
         col = 1
-        self.__add_col_n(col, "N")
+        self.__add_col_k(col, "N")
         col += 1
 
         # Create column bds (M0)
@@ -120,7 +119,7 @@ class ComputePeriod:
                 self.__add_start_row(row, source, target, n_coef, lti)
                 row += 1
 
-    def __solve_prob(self):  # Launch the solver and set preload of the graph
+    def __solve_prob(self, print_start_time):  # Launch the solver and set preload of the graph
         logging.info("loading matrix ...")
         glp_load_matrix(self.prob, self.var_array_size - 1, self.var_row, self.var_col, self.var_coef)
 
@@ -133,30 +132,27 @@ class ComputePeriod:
         logging.info("Solver return: " + ret)
 
         # Start date for each task
-        # for task in self.dataflow.get_task_list():
-        #     print "start time of task " + str(task) + " : " + str(glp_get_col_prim(self.prob, self.col_start[task]))
+        if print_start_time:
+            for task in self.dataflow.get_task_list():
+                print "start time of task " + str(task) + " : " + str(
+                    glp_get_col_prim(self.prob, self.col_start[task]))
 
-        return glp_get_col_prim(self.prob, self.N)
+        return glp_get_col_prim(self.prob, self.K)
 
     # Add the variable N
-    def __add_col_n(self, col, name):
+    def __add_col_k(self, col, name):
         kmin = 0.0
-        # Bound N for faster solving and handle re-entrant arc here.
-        for arc in self.dataflow.get_arc_list():
-            if self.dataflow.is_sdf:
-                task_duration = self.dataflow.get_task_duration(self.dataflow.get_source(arc))
-                cons = self.dataflow.get_cons_rate(arc)
-            if self.dataflow.is_csdf:
-                task_duration = sum(self.dataflow.get_phase_duration_list(self.dataflow.get_source(arc)))
-                cons = sum(self.dataflow.get_cons_rate_list(arc))
-            m0 = self.dataflow.get_initial_marking(arc)
-            gcd = self.dataflow.get_gcd(arc)
-            if cons - m0 - gcd < 0:
-                kmin = min(kmin, float(task_duration) / float(cons - m0 - gcd))
+        for task in self.dataflow.get_task_list():
+            l = self.dataflow.get_task_duration(task)
+            try:
+                z = self.dataflow.get_prod_rate(self.dataflow.get_arc_list(source=task)[0])
+            except IndexError:
+                z = self.dataflow.get_cons_rate(self.dataflow.get_arc_list(target=task)[0])
+            kmin = max(kmin, float(l) / float(z))
         glp_set_col_name(self.prob, col, name)
-        glp_set_col_bnds(self.prob, col, GLP_LO, -kmin, 0.0)
+        glp_set_col_bnds(self.prob, col, GLP_LO, kmin, 0.0)
         glp_set_obj_coef(self.prob, col, 1.0)
-        self.N = col
+        self.K = col
 
     # Add a variable start
     def __add_col_start(self, col, name, task):
@@ -177,7 +173,7 @@ class ComputePeriod:
         self.k += 1
 
         self.var_row[self.k] = row
-        self.var_col[self.k] = self.N
+        self.var_col[self.k] = self.K
         self.var_coef[self.k] = float(n_coef)
         self.k += 1
 

@@ -24,7 +24,7 @@ class SDF(Dataflow):
 
     def __str__(self):
         ret = super(SDF, self).__str__()
-        ret += "\nNormalized: "+str(self.is_normalized)+"\n"
+        ret += "\nNormalized: " + str(self.is_normalized) + "\n"
         return ret
 
     def __eq__(self, other):
@@ -178,9 +178,9 @@ class SDF(Dataflow):
         """
         return str(self.get_task_duration(task))
 
-    def get_period(self):
+    def get_period(self, print_start_time=False):
         pc = ComputePeriod(self)
-        return pc.compute_period()
+        return pc.compute_period(print_start_time)
 
     ########################################################################
     #                        PROPERTIES graph                              #
