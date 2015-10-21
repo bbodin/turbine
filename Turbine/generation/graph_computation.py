@@ -92,7 +92,7 @@ def __generate_connex_dag(dataflow, c_param):
     logging.info("Generate connex directed acyclic graph")
     # First generate a path graph with x nodes and x-1 arcs
     if c_param.get_nb_task() < 10:
-        path_nodes_nb = randint(1, int(math.ceil(c_param.get_nb_task() / 2.0)))
+        path_nodes_nb = randint(2, int(c_param.get_nb_task() / 2))
     else:
         path_nodes_nb = int(c_param.get_nb_task() / randint(2, int(c_param.get_nb_task() / 2)))
 
@@ -117,7 +117,7 @@ def __generate_connex_dag(dataflow, c_param):
 
 
 def __generate_arcs_dag(dataflow, c_param, path):
-    logging.info("Generate more arcs")
+    logging.info("generate more arcs")
     nb_arc_min = c_param.get_min_arcs_count() if c_param.get_min_arcs_count() == 0 else c_param.get_min_arcs_count() - 1
     nb_arc_max = c_param.get_max_arcs_count() if c_param.get_max_arcs_count() == 0 else c_param.get_max_arcs_count() - 1
 
@@ -125,10 +125,9 @@ def __generate_arcs_dag(dataflow, c_param, path):
     nb_tot_arcs = sum(arc_nb)
 
     added_arc_nb = 0
-    task_nb = 0
     for path_rank in xrange(len(path)):
         for task in path[path_rank]:
-            for _ in xrange(arc_nb[task_nb]):
+            for i in xrange(arc_nb[task]):
                 __add_random_dag_arc(dataflow, task, path_rank, path)
                 added_arc_nb += 1
                 logging.info(str((added_arc_nb + 1) + dataflow.get_task_count()) +
@@ -142,7 +141,7 @@ def __add_random_dag_arc(dataflow, task, task_rank, path):
     else:
         random_rank = randint(task_rank + 1, path_nodes_nb - 1)
 
-    random_task = path[random_rank][randint(0, len(path[random_rank])-1)]
+    random_task = path[random_rank][randint(0, len(path[random_rank]) - 1)]
 
     if task_rank > random_rank:
         dataflow.add_arc(random_task, task)
