@@ -8,14 +8,14 @@ class PCG(CSDF):
     #                           CONSTANT                                   #
     ########################################################################
     # -------------------------Task----------------------------------------#
-    CONST_INI_PHASE_DURATION_LIST = "iniPhaDurL"
+    __CONST_INI_PHASE_DURATION_LIST = "iniPhaDurL"
 
     # -------------------------Arc-----------------------------------------#
-    CONST_ARC_INI_CONS_RATE_LIST = "iniCL"
-    CONST_ARC_INI_PROD_RATE_LIST = "iniPL"
+    __CONST_ARC_INI_CONS_RATE_LIST = "iniCL"
+    __CONST_ARC_INI_PROD_RATE_LIST = "iniPL"
 
-    CONST_ARC_THRESHOLD_LIST = "thrL"
-    CONST_ARC_INI_THRESHOLD_LIST = "iniThrL"
+    __CONST_ARC_THRESHOLD_LIST = "thrL"
+    __CONST_ARC_INI_THRESHOLD_LIST = "iniThrL"
 
     def __init__(self, name=""):
         """
@@ -66,10 +66,10 @@ class PCG(CSDF):
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~GETTER of tasks~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def get_ini_phase_count(self, task):
-        return len(self._get_task_attribute(task, self.CONST_INI_PHASE_DURATION_LIST))
+        return len(self._get_task_attribute(task, self.__CONST_INI_PHASE_DURATION_LIST))
 
     def get_ini_phase_duration_list(self, task):
-        return self._get_task_attribute(task, self.CONST_INI_PHASE_DURATION_LIST)
+        return self._get_task_attribute(task, self.__CONST_INI_PHASE_DURATION_LIST)
 
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~SETTER of tasks~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -92,7 +92,7 @@ class PCG(CSDF):
         except KeyError:
             pass
 
-        self.nxg.node[task][self.CONST_INI_PHASE_DURATION_LIST] = [1] * ini_phase_count
+        self.nxg.node[task][self.__CONST_INI_PHASE_DURATION_LIST] = [1] * ini_phase_count
 
         for arc in self.get_arc_list(target=task):
             self.set_ini_cons_rate_list(arc, [1] * ini_phase_count)
@@ -109,7 +109,7 @@ class PCG(CSDF):
         iniPhaseDurationList : the list of initial phase duration of the task (integer).
         """
         self.__verify_length_ini(task, len(ini_phase_duration_list))
-        self._set_task_attribute(task, ini_phase_duration_list, self.CONST_INI_PHASE_DURATION_LIST)
+        self._set_task_attribute(task, ini_phase_duration_list, self.__CONST_INI_PHASE_DURATION_LIST)
 
     def __verify_length_ini(self, task, length_list):
         """Compare the length of a list and the initial phase number of a task.
@@ -148,16 +148,16 @@ class PCG(CSDF):
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~GETTER of arcs~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def get_ini_cons_rate_list(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_INI_CONS_RATE_LIST)
+        return self._get_arc_attribute(arc, self.__CONST_ARC_INI_CONS_RATE_LIST)
 
     def get_ini_prod_rate_list(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_INI_PROD_RATE_LIST)
+        return self._get_arc_attribute(arc, self.__CONST_ARC_INI_PROD_RATE_LIST)
 
     def get_threshold_list(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_THRESHOLD_LIST)
+        return self._get_arc_attribute(arc, self.__CONST_ARC_THRESHOLD_LIST)
 
     def get_ini_threshold_list(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_INI_THRESHOLD_LIST)
+        return self._get_arc_attribute(arc, self.__CONST_ARC_INI_THRESHOLD_LIST)
 
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~SETTER of arcs~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -177,20 +177,20 @@ class PCG(CSDF):
         self.__calc_gcd(arc)
 
     def set_ini_cons_rate_list(self, arc, ini_cons_rate):
-        self._set_arc_attribute(arc, ini_cons_rate, self.CONST_ARC_INI_CONS_RATE_LIST)
+        self._set_arc_attribute(arc, ini_cons_rate, self.__CONST_ARC_INI_CONS_RATE_LIST)
         self.set_ini_threshold_list(arc, ini_cons_rate)
         self.__calc_gcd(arc)
 
     def set_ini_prod_rate_list(self, arc, ini_prod_rate):
-        self._set_arc_attribute(arc, ini_prod_rate, self.CONST_ARC_INI_PROD_RATE_LIST)
+        self._set_arc_attribute(arc, ini_prod_rate, self.__CONST_ARC_INI_PROD_RATE_LIST)
         self.__calc_gcd(arc)
 
     def set_threshold_list(self, arc, threshold_list):
-        self._set_arc_attribute(arc, threshold_list, self.CONST_ARC_THRESHOLD_LIST)
+        self._set_arc_attribute(arc, threshold_list, self.__CONST_ARC_THRESHOLD_LIST)
         self.__calc_gcd(arc)
 
     def set_ini_threshold_list(self, arc, ini_threshold_list):
-        self._set_arc_attribute(arc, ini_threshold_list, self.CONST_ARC_INI_THRESHOLD_LIST)
+        self._set_arc_attribute(arc, ini_threshold_list, self.__CONST_ARC_INI_THRESHOLD_LIST)
         self.__calc_gcd(arc)
 
     def __calc_gcd(self, arc):
@@ -212,7 +212,7 @@ class PCG(CSDF):
                 gcd_v = reduce(gcd, self.get_threshold_list(arc)+[gcd_v])
             if not self.get_ini_threshold_list == []:
                 gcd_v = reduce(gcd, self.get_ini_threshold_list(arc)+[gcd_v])
-            self._set_arc_attribute(arc, gcd_v, self.CONST_ARC_GCD)
+            self._set_arc_attribute(arc, gcd_v, self._CONST_ARC_GCD)
         except KeyError:
             pass
 

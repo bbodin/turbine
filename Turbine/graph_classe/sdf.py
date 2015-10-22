@@ -9,11 +9,11 @@ class SDF(Dataflow):
     #                           CONSTANT                                   #
     ########################################################################
     # -------------------------Task----------------------------------------#
-    CONST_TASK_DURATION = "tDur"
+    __CONST_TASK_DURATION = "tDur"
 
     # -------------------------Arc-----------------------------------------#
-    CONST_ARC_CONS_RATE = "cL"
-    CONST_ARC_PROD_RATE = "pL"
+    __CONST_ARC_CONS_RATE = "cL"
+    __CONST_ARC_PROD_RATE = "pL"
 
     def __init__(self, name=""):
         """
@@ -24,7 +24,8 @@ class SDF(Dataflow):
 
     def __str__(self):
         ret = super(SDF, self).__str__()
-        ret += "\nNormalized: " + str(self.is_normalized) + "\n"
+        if self.get_arc_count() > 0:
+            ret += "\nNormalized: " + str(self.is_normalized) + "\n"
         return ret
 
     def __eq__(self, other):
@@ -68,7 +69,7 @@ class SDF(Dataflow):
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~GETTER of tasks~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def get_task_duration(self, task):
-        return self._get_task_attribute(task, self.CONST_TASK_DURATION)
+        return self._get_task_attribute(task, self.__CONST_TASK_DURATION)
 
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~SETTER of tasks~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -77,7 +78,7 @@ class SDF(Dataflow):
 
         :type duration: int
         """
-        return self._set_task_attribute(task, duration, self.CONST_TASK_DURATION)
+        return self._set_task_attribute(task, duration, self.__CONST_TASK_DURATION)
 
     ########################################################################
     #                           add/modify arcs                            #
@@ -96,10 +97,10 @@ class SDF(Dataflow):
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~GETTER of arcs~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def get_cons_rate(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_CONS_RATE)
+        return self._get_arc_attribute(arc, self.__CONST_ARC_CONS_RATE)
 
     def get_prod_rate(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_PROD_RATE)
+        return self._get_arc_attribute(arc, self.__CONST_ARC_PROD_RATE)
 
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~SETTER of arcs~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -113,7 +114,7 @@ class SDF(Dataflow):
 
         :type cons_rate: int
         """
-        self._set_arc_attribute(arc, cons_rate, self.CONST_ARC_CONS_RATE)
+        self._set_arc_attribute(arc, cons_rate, self.__CONST_ARC_CONS_RATE)
         self.__calc_gcd(arc)
 
     def set_prod_rate(self, arc, prod_rate):
@@ -126,7 +127,7 @@ class SDF(Dataflow):
 
         :type prod_rate: int
         """
-        self._set_arc_attribute(arc, prod_rate, self.CONST_ARC_PROD_RATE)
+        self._set_arc_attribute(arc, prod_rate, self.__CONST_ARC_PROD_RATE)
         self.__calc_gcd(arc)
 
     def __calc_gcd(self, arc):
@@ -140,7 +141,7 @@ class SDF(Dataflow):
         """
         try:
             gcd_v = gcd(self.get_cons_rate(arc), self.get_prod_rate(arc))
-            self._set_arc_attribute(arc, gcd_v, self.CONST_ARC_GCD)
+            self._set_arc_attribute(arc, gcd_v, self._CONST_ARC_GCD)
         except KeyError:
             pass
 
@@ -179,8 +180,14 @@ class SDF(Dataflow):
         return str(self.get_task_duration(task))
 
     def get_period(self, print_start_time=False):
+        coef_vector = None
+        if not self.is_normalized:
+            coef_vector = self.normalized()
         pc = ComputePeriod(self)
-        return pc.compute_period(print_start_time)
+        ret = pc.compute_period(print_start_time)
+        if coef_vector is not None:
+            self.un_normalized(coef_vector)
+        return ret
 
     ########################################################################
     #                        PROPERTIES graph                              #

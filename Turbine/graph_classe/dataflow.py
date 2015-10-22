@@ -13,18 +13,18 @@ class Dataflow(object):
     #                           CONSTANT                                   #
     ########################################################################
     # --------------------------Task----------------------------------------#
-    CONST_TASK_NAME = "tName"
-    CONST_TASK_REPETITION_FACTOR = "repFac"
+    _CONST_TASK_NAME = "tName"
+    _CONST_TASK_REPETITION_FACTOR = "repFac"
 
     # --------------------------Arc-----------------------------------------#
-    CONST_ARC_NAME = "aName"
+    _CONST_ARC_NAME = "aName"
 
-    CONST_ARC_PRELOAD = "aPrel"
-    CONST_ARC_TOKEN_SIZE = "tokS"
-    CONST_ARC_GCD = "aGcd"
+    _CONST_ARC_PRELOAD = "aPrel"
+    _CONST_ARC_TOKEN_SIZE = "tokS"
+    _CONST_ARC_GCD = "aGcd"
 
-    CONST_ARC_CONS_PORT_NAME = "cPN"
-    CONST_ARC_PROD_PORT_NAME = "pPN"
+    _CONST_ARC_CONS_PORT_NAME = "cPN"
+    _CONST_ARC_PROD_PORT_NAME = "pPN"
 
     def __init__(self, name=""):
         """
@@ -116,7 +116,7 @@ class Dataflow(object):
         ----------
         :param task: the specific task
         """
-        return self.nxg.node[task][self.CONST_TASK_NAME]
+        return self.nxg.node[task][self._CONST_TASK_NAME]
 
     @staticmethod
     def get_source(arc):
@@ -190,7 +190,7 @@ class Dataflow(object):
         ----------
         An integer.
         """
-        return self.nxg.node[task][self.CONST_TASK_REPETITION_FACTOR]
+        return self.nxg.node[task][self._CONST_TASK_REPETITION_FACTOR]
 
     def _get_task_attribute(self, task, attrib_name):
         """Get the arc attribute with the attribute name attribName.
@@ -219,7 +219,7 @@ class Dataflow(object):
         task : the task targeted.
         name : the name of the task.
         """
-        self.nxg.node[task][self.CONST_TASK_NAME] = name
+        self.nxg.node[task][self._CONST_TASK_NAME] = name
         return name
 
     def set_repetition_factor(self, task, repetition_factor):
@@ -230,7 +230,7 @@ class Dataflow(object):
         task : the task targeted.
         repetitionFactor : the new repetition factor (integer).
         """
-        self.nxg.node[task][self.CONST_TASK_REPETITION_FACTOR] = repetition_factor
+        self.nxg.node[task][self._CONST_TASK_REPETITION_FACTOR] = repetition_factor
 
     def _set_task_attribute(self, task, attrib, attrib_name):
         """Get the arc attribute with the attribute name attribName.
@@ -312,7 +312,7 @@ class Dataflow(object):
         arc : tuple (source, destination) or (source, destination, name)
             (default name=lowest unused integer).
         """
-        return self._get_arc_attribute(arc, self.CONST_ARC_NAME)
+        return self._get_arc_attribute(arc, self._CONST_ARC_NAME)
 
     def get_arc_list(self, source=None, target=None):
         """:return : an arc according to parameters filled.
@@ -348,7 +348,7 @@ class Dataflow(object):
         arc : tuple (source, destination) or (source, destination, name)
             (default name=lowest unused integer).
         """
-        return self._get_arc_attribute(arc, self.CONST_ARC_PRELOAD)
+        return self._get_arc_attribute(arc, self._CONST_ARC_PRELOAD)
 
     def get_token_size(self, arc):
         """:return : the token size of an arc (default 1).
@@ -358,7 +358,7 @@ class Dataflow(object):
         arc : tuple (source, destination) or (source, destination, name)
             (default name=lowest unused integer).
         """
-        return self._get_arc_attribute(arc, self.CONST_ARC_TOKEN_SIZE)
+        return self._get_arc_attribute(arc, self._CONST_ARC_TOKEN_SIZE)
 
     def get_cons_port_name(self, arc):
         """:return : the consumption port name of an arc. This is used only for sdf3 files .
@@ -368,7 +368,7 @@ class Dataflow(object):
         arc : tuple (source, destination) or (source, destination, name)
             (default name=lowest unused integer).
         """
-        return self._get_arc_attribute(arc, self.CONST_ARC_CONS_PORT_NAME)
+        return self._get_arc_attribute(arc, self._CONST_ARC_CONS_PORT_NAME)
 
     def get_prod_port_name(self, arc):
         """:return : the production port name of an arc. This is used only for sdf3 files.
@@ -378,10 +378,10 @@ class Dataflow(object):
         arc : tuple (source, destination) or (source, destination, name)
             (default name=lowest unused integer).
         """
-        return self._get_arc_attribute(arc, self.CONST_ARC_PROD_PORT_NAME)
+        return self._get_arc_attribute(arc, self._CONST_ARC_PROD_PORT_NAME)
 
     def get_gcd(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_GCD)
+        return self._get_arc_attribute(arc, self._CONST_ARC_GCD)
 
     def _get_arc_attribute(self, arc, attrib_name):
         """Get the arc attribute with the attribute name attribName.
@@ -418,7 +418,7 @@ class Dataflow(object):
         except KeyError:
             pass
 
-        self._set_arc_attribute(arc, str(name), self.CONST_ARC_NAME)
+        self._set_arc_attribute(arc, str(name), self._CONST_ARC_NAME)
 
     def set_initial_marking(self, arc, initial_marking):
         """Set the initial marking of an arc.
@@ -429,7 +429,7 @@ class Dataflow(object):
             (default name=lowest unused integer).
         preload : (integer) the value of the initial marking.
         """
-        self._set_arc_attribute(arc, initial_marking, self.CONST_ARC_PRELOAD)
+        self._set_arc_attribute(arc, initial_marking, self._CONST_ARC_PRELOAD)
 
     def set_token_size(self, arc, token_size):
         """Set the token size of an arc.
@@ -440,7 +440,7 @@ class Dataflow(object):
             (default name=lowest unused integer).
         tokenSize : the token size of this bds/arc (integer).
         """
-        self._set_arc_attribute(arc, token_size, self.CONST_ARC_TOKEN_SIZE)
+        self._set_arc_attribute(arc, token_size, self._CONST_ARC_TOKEN_SIZE)
 
     def set_cons_port_name(self, arc, cons_port_name):
         """Set the consumption port name of an arc.
@@ -453,7 +453,7 @@ class Dataflow(object):
 
         This is only used with the SDF3 sol_file_parser.
         """
-        self._set_arc_attribute(arc, cons_port_name, self.CONST_ARC_CONS_PORT_NAME)
+        self._set_arc_attribute(arc, cons_port_name, self._CONST_ARC_CONS_PORT_NAME)
 
     def set_prod_port_name(self, arc, prod_port_name):
         """Set the production port name in an arc.
@@ -466,7 +466,7 @@ class Dataflow(object):
 
         This is only used with the SDF3 sol_file_parser.
         """
-        self._set_arc_attribute(arc, prod_port_name, self.CONST_ARC_PROD_PORT_NAME)
+        self._set_arc_attribute(arc, prod_port_name, self._CONST_ARC_PROD_PORT_NAME)
 
     def _set_arc_attribute(self, arc, attrib, attrib_name):
         """Set a specific attribute to the arc (prelo/cPoNa/pPoNa/...).
@@ -535,7 +535,7 @@ class Dataflow(object):
         :type period: int,
         """
         compute_initial_marking(self, solver_str=solver_str, solver_verbose=solver_verbose, lp_filename=lp_filename,
-                                period=period)
+                            period=period)
 
     def compute_repetition_vector(self):
         return compute_rep_vect(self)
@@ -582,7 +582,8 @@ class Dataflow(object):
         """
         if self.is_reentrant:
             return True
-        return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1
+        return not nx.is_directed_acyclic_graph(self.nxg)
+        # return max(len(cc) for cc in nx.strongly_connected_components(self.nxg)) > 1
 
     @property
     def is_bounded(self):

@@ -8,11 +8,11 @@ class CSDF(Dataflow):
     #                           CONSTANT                                   #
     ########################################################################
     # -------------------------Task----------------------------------------#
-    CONST_PHASE_DURATION_LIST = "pDurL"
+    _CONST_PHASE_DURATION_LIST = "pDurL"
 
     # -------------------------Arc-----------------------------------------#
-    CONST_ARC_CONS_RATE_LIST = "cL"
-    CONST_ARC_PROD_RATE_LIST = "pL"
+    _CONST_ARC_CONS_RATE_LIST = "cL"
+    _CONST_ARC_PROD_RATE_LIST = "pL"
 
     def __init__(self, name=""):
         """
@@ -67,10 +67,10 @@ class CSDF(Dataflow):
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~GETTER of tasks~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def get_phase_count(self, task):
-        return len(self._get_task_attribute(task, self.CONST_PHASE_DURATION_LIST))
+        return len(self._get_task_attribute(task, self._CONST_PHASE_DURATION_LIST))
 
     def get_phase_duration_list(self, task):
-        return self._get_task_attribute(task, self.CONST_PHASE_DURATION_LIST)
+        return self._get_task_attribute(task, self._CONST_PHASE_DURATION_LIST)
 
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~SETTER of tasks~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -93,7 +93,7 @@ class CSDF(Dataflow):
         except KeyError:
             pass
 
-        self.nxg.node[task][self.CONST_PHASE_DURATION_LIST] = [1] * phase_count
+        self.nxg.node[task][self._CONST_PHASE_DURATION_LIST] = [1] * phase_count
 
         for arc in self.get_arc_list(target=task):
             self.set_cons_rate_list(arc, [1] * phase_count)
@@ -110,7 +110,7 @@ class CSDF(Dataflow):
         :type phase_duration_list : list the list of phase duration of the task (integer).
         """
         self.__verify_length(task, len(phase_duration_list))
-        self.nxg.node[task][self.CONST_PHASE_DURATION_LIST] = phase_duration_list
+        self.nxg.node[task][self._CONST_PHASE_DURATION_LIST] = phase_duration_list
 
     def __verify_length(self, task, length_list):
         """Compare the length of a list and the phase number of a task.
@@ -148,10 +148,10 @@ class CSDF(Dataflow):
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~GETTER of arcs~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def get_cons_rate_list(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_CONS_RATE_LIST)
+        return self._get_arc_attribute(arc, self._CONST_ARC_CONS_RATE_LIST)
 
     def get_prod_rate_list(self, arc):
-        return self._get_arc_attribute(arc, self.CONST_ARC_PROD_RATE_LIST)
+        return self._get_arc_attribute(arc, self._CONST_ARC_PROD_RATE_LIST)
 
     ########################################################################
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~SETTER of arcs~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -165,7 +165,7 @@ class CSDF(Dataflow):
 
         :type cons_rate_list: list of integer
         """
-        self._set_arc_attribute(arc, cons_rate_list, self.CONST_ARC_CONS_RATE_LIST)
+        self._set_arc_attribute(arc, cons_rate_list, self._CONST_ARC_CONS_RATE_LIST)
         self.__calc_gcd(arc)
 
     def set_prod_rate_list(self, arc, prod_rate_list):
@@ -178,7 +178,7 @@ class CSDF(Dataflow):
 
         :type prod_rate_list: list of integer
         """
-        self._set_arc_attribute(arc, prod_rate_list, self.CONST_ARC_PROD_RATE_LIST)
+        self._set_arc_attribute(arc, prod_rate_list, self._CONST_ARC_PROD_RATE_LIST)
         self.__calc_gcd(arc)
 
     def __calc_gcd(self, arc):
@@ -194,7 +194,7 @@ class CSDF(Dataflow):
             a = reduce(gcd, self.get_cons_rate_list(arc))
             b = reduce(gcd, self.get_prod_rate_list(arc))
             gcd_v = gcd(a, b)
-            self._set_arc_attribute(arc, gcd_v, self.CONST_ARC_GCD)
+            self._set_arc_attribute(arc, gcd_v, self._CONST_ARC_GCD)
         except KeyError:
             pass
 
