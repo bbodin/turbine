@@ -1,4 +1,5 @@
 from fractions import Fraction
+from math import ceil
 
 from numpy.random.mtrand import randint
 
@@ -6,12 +7,14 @@ from Turbine.calc.lcm import lcm, lcm_list
 
 
 def normalized_dataflow(dataflow):
-    """Normalize according to a coefficient vector.
+    """Normalize a dataflow and return the coefficient vector to un-normalized it.
 
     Return
     ------
-    Return the un-normalize graph.
+    :return the un-normalize graph.
     """
+    if not dataflow.is_consistent:
+        raise Exception("Dataflow must be consistent to be normalized")
     if dataflow.is_normalized:
         return dataflow
 
@@ -20,16 +23,17 @@ def normalized_dataflow(dataflow):
     for arc in dataflow.get_arc_list():
         multiply_arc(dataflow, arc, coef_vector[arc])
 
+    for arc in dataflow.get_arc_list():
+        coef_vector[arc] = Fraction(numerator=1, denominator=coef_vector[arc])
+
+    return coef_vector
+
 
 def un_normalized_dataflow(dataflow, coef_vector=None):
     """Un-normalize according to a coefficient vector.
-
-    Return
-    ------
-    Return the un-normalize graph.
     """
     if not dataflow.is_normalized:
-        return dataflow
+        return
 
     if coef_vector is not None:
         if not __test_coef_vector(dataflow, coef_vector):
@@ -40,14 +44,16 @@ def un_normalized_dataflow(dataflow, coef_vector=None):
     for arc in dataflow.get_arc_list():
         multiply_arc(dataflow, arc, coef_vector[arc])
 
-    return coef_vector
-
 
 def multiply_arc(dataflow, arc, coef):
-    dataflow.set_initial_marking(arc, int(dataflow.get_initial_marking(arc) * coef))
+    if not __test_coef(coef, [dataflow.get_initial_marking(arc)]):
+        dataflow.set_initial_marking(arc, int(ceil(dataflow.get_initial_marking(arc) * coef)))
+    else:
+        dataflow.set_initial_marking(arc, int(dataflow.get_initial_marking(arc) * coef))
+
     if dataflow.is_sdf:
-        dataflow.set_prod_rate(arc, dataflow.get_prod_rate(arc)*coef)
-        dataflow.set_cons_rate(arc, dataflow.get_cons_rate(arc)*coef)
+        dataflow.set_prod_rate(arc, int(dataflow.get_prod_rate(arc) * coef))
+        dataflow.set_cons_rate(arc, int(dataflow.get_cons_rate(arc) * coef))
     if dataflow.is_csdf:
         dataflow.set_prod_rate_list(arc, [int(x * coef) for x in dataflow.get_prod_rate_list(arc)])
         dataflow.set_cons_rate_list(arc, [int(x * coef) for x in dataflow.get_cons_rate_list(arc)])
@@ -75,38 +81,11 @@ def get_normalized_vector(dataflow):
             rate = dataflow.get_prod_rate(arc)
         if dataflow.is_csdf:
             rate = sum(dataflow.get_prod_rate_list(arc))
-        zi = lcm_rf/dataflow.get_repetition_factor(dataflow.get_source(arc))
+        zi = lcm_rf / dataflow.get_repetition_factor(dataflow.get_source(arc))
         # print lcm_rf, "t"+str(dataflow.get_source(arc)), dataflow.get_repetition_factor(dataflow.get_source(arc))
         # print str(arc[0])+"->"+str(arc[1]), "zi", zi, "rate", rate, "ka", Fraction(numerator=zi, denominator=rate)
         coef_list[arc] = Fraction(numerator=zi, denominator=rate)
     return coef_list
-
-
-def get_normalized_vector_old(dataflow):
-    """Compute the normalization vector of an un-normalize graph.
-
-    Return
-    ------
-    Return the the vector of coefficient for normalize the graph.
-    """
-    coef = {}
-    lcm_v = 1
-    for arc in dataflow.get_arc_list():
-        if dataflow.is_sdf:
-            rate = dataflow.get_prod_rate(arc)
-        if dataflow.is_csdf:
-            rate = sum(dataflow.get_prod_rate_list(arc))
-        rate *= dataflow.get_repetition_factor(dataflow.get_source(arc))
-        lcm_v = lcm_list([lcm_v, rate])
-
-    for arc in dataflow.get_arc_list():
-        ri = dataflow.get_repetition_factor(dataflow.get_source(arc))
-        if dataflow.is_sdf:
-            zi = dataflow.get_prod_rate(arc)
-        if dataflow.is_csdf:
-            zi = sum(dataflow.get_prod_rate_list(arc))
-        coef[arc] = (lcm_v / ri) / zi
-    return coef
 
 
 def get_rdm_un_normalized_vector(dataflow, max_num=10):
@@ -131,8 +110,6 @@ def __test_coef_vector(dataflow, coef_vector):
 
     for arc in dataflow.get_arc_list():
         coef = coef_vector[arc]
-        if not __test_coef(coef, [dataflow.get_initial_marking(arc)]):
-            return False
 
         if dataflow.is_sdf:
             if not __test_coef(coef, [dataflow.get_prod_rate(arc)]):
@@ -160,7 +137,6 @@ def __test_coef_vector(dataflow, coef_vector):
 
 def __test_coef(coef, coef_list):
     for x in coef_list:
-        if x * coef != int(x * coef):
+        if int(x) * coef != int(int(x) * coef):
             return False
     return True
-

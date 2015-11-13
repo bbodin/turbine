@@ -3,6 +3,7 @@ Created on Jul 8, 2014
 """
 from glpk import *
 import logging
+from Partitioning.tools.glpk.error_manager import get_error_message
 
 
 class ComputePeriod:
@@ -51,10 +52,10 @@ class ComputePeriod:
         self.glpkParam = glp_smcp()
         glp_init_smcp(self.glpkParam)  # Do it before modify parameters
 
-        self.glpkParam.presolve = GLP_ON
+        self.glpkParam.presolve = GLP_OFF
         self.glpkParam.msg_lev = GLP_MSG_ALL
         if not self.verbose:
-            self.glpkParam.msg_lev = GLP_MSG_ERR
+            self.glpkParam.msg_lev = GLP_MSG_OFF
         self.glpkParam.meth = GLP_DUALP
         self.glpkParam.out_frq = 2000  # consol print frequency
 
@@ -128,8 +129,10 @@ class ComputePeriod:
             logging.info("Writing problem: " + str(problem_location))
 
         logging.info("solving problem ...")
-        ret = str(glp_simplex(self.prob, self.glpkParam))
-        logging.info("Solver return: " + ret)
+        ret = glp_simplex(self.prob, self.glpkParam)
+        logging.info("Solver return: " + str(ret))
+        if not ret == 0:
+            get_error_message(ret)
 
         # Start date for each task
         if print_start_time:
