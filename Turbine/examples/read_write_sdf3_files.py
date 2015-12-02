@@ -8,9 +8,9 @@ from Turbine.param.parameters import Parameters
 print "###### Setup the SDF generation #####"
 c_param = Parameters()
 c_param.set_dataflow_type("SDF")
-c_param.set_min_arcs_count(1)
-c_param.set_max_arcs_count(5)
-c_param.set_nb_task(100)
+c_param.set_min_task_degree(1)
+c_param.set_max_task_degree(2)
+c_param.set_nb_task(5)
 
 print "###### Generate dataflow ############"
 SDFG = generate("SDF_of_test", c_param)  # Generate a SDF for the example.

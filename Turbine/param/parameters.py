@@ -12,9 +12,9 @@ class Parameters:
         # Number of task in the dataflow
         self.__NB_TASK = 10
         # Minimum output/input arc count for the dataflow
-        self.__MIN_ARCS_COUNT = 1
+        self.__MIN_TASK_DEGREE = 1
         # Maximum output/input arc count for the dataflow 
-        self.__MAX_ARCS_COUNT = 5
+        self.__MAX_TASK_DEGREE = 3
 
         # PHASES
         # Minimum phase count for a task
@@ -33,7 +33,6 @@ class Parameters:
         self.__AVERAGE__INI_TIME = 10
         
         # ARC
-        #
         self.__AVERAGE_INI_WEIGHT = 10
 
         # TASK
@@ -48,6 +47,9 @@ class Parameters:
 
         # True generate dataflow with re-entrant arc
         self.__REENTRANT = False
+
+        # True generate dataflow with multi arc
+        self.__MULTI_ARC = False
 
         # True generate an acyclic dataflow
         self.__ACYCLIC = False
@@ -70,45 +72,49 @@ class Parameters:
         """Set the number of task/actors of the dataflow dataflow.
         default: 10
         """
-        self.__verify_integer(value)
+        self.__verify_integer_non_null(value)
         if value < 2:
             raise Exception("Wrong value: it must be greater than 1")
         self.__NB_TASK = int(value)
 
-    def set_min_arcs_count(self, value):
+    def set_min_task_degree(self, value):
         """Set the minimum arcs count during the random selection of the dataflow dataflow.
         default: 1
         """        
-        self.__verify_integer(value)
-        self.__MIN_ARCS_COUNT = int(value)
+        self.__verify_integer_non_null(value)
+        self.__MIN_TASK_DEGREE = int(value)
 
-    def set_max_arcs_count(self, value):
+    def set_max_task_degree(self, value):
         """Set the maximum arcs count during the random selection of the dataflow dataflow.
         default: 5
         """        
-        self.__verify_integer(value)
-        self.__MAX_ARCS_COUNT = int(value)
+        self.__verify_integer_non_negativ(value)
+        if value < 2:
+            raise Exception("Max must be higher than 1")
+        self.__MAX_TASK_DEGREE = int(value)
 
     # PHASES
     def set_min_phase_count(self, value):
         """Set task's minimum phase count during the random selection of the dataflow dataflow.
         default: 1
         """
-        self.__verify_integer(value)
+        self.__verify_integer_non_null(value)
         self.__MIN_PHASE_COUNT = int(value)
 
     def set_max_phase_count(self, value):
         """Set task's maximum phase count during the random selection of the dataflow dataflow.
         default: 5
         """        
-        self.__verify_integer(value)
+        self.__verify_integer_non_negativ(value)
+        if value < self.get_min_phase_count():
+            raise Exception("Max must be higher than min value")
         self.__MAX_PHASE_COUNT = int(value)
 
     def set_average_time(self, value):
         """Set phase's average time during the random selection of the dataflow dataflow.
         default: 10
         """        
-        self.__verify_integer(value)
+        self.__verify_integer_non_null(value)
         self.__AVERAGE_TIME = int(value)
 
     # INITIAL PHASES
@@ -116,28 +122,30 @@ class Parameters:
         """Set task's minimum initial phase count during the random selection of the dataflow dataflow.
         default: 0
         """        
-        self.__verify_integer(value)
+        self.__verify_integer_non_negativ(value)
         self.__MIN_INI_PHASE_COUNT = int(value)
 
     def set_max_ini_phase_count(self, value):
         """Set task's maximum phase count during the random selection of the dataflow dataflow.
         default: 2
         """        
-        self.__verify_integer(value)
+        self.__verify_integer_non_negativ(value)
+        if value < self.get_min_ini_phase_count():
+            raise Exception("Max must be higher than min value")
         self.__MAX_INI_PHASE_COUNT = int(value)
 
     def set_average_ini_time(self, value):
         """Set initial phase's average time during the random selection of the dataflow dataflow.
         default: 10
         """        
-        self.__verify_integer(value)
+        self.__verify_integer_non_negativ(value)
         self.__AVERAGE__INI_TIME = int(value)
 
     def set_average_ini_weight(self, value):
         """Set initial phase's average time during the random selection of the dataflow dataflow.
         default: 10
         """        
-        self.__verify_integer(value)
+        self.__verify_integer_non_null(value)
         self.__AVERAGE_INI_WEIGHT = int(value)
 
     # Mean repetition factor
@@ -145,7 +153,7 @@ class Parameters:
         """Set task's average repetition factor during the random selection of the dataflow dataflow.
         default: 5
         """        
-        self.__verify_integer(value)
+        self.__verify_integer_non_null(value)
         self.__AVERAGE_RF = int(value)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~dataflow~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -169,6 +177,13 @@ class Parameters:
         :type value: bool
         """
         self.__REENTRANT = bool(value)
+
+    def set_multi_graph(self, value):
+        """
+
+        :type value: bool
+        """
+        self.__MULTI_ARC = bool(value)
 
     def set_acyclic(self, value):
         """
@@ -213,15 +228,15 @@ class Parameters:
         """        
         return self.__NB_TASK
 
-    def get_min_arcs_count(self):
+    def get_min_task_degree(self):
         """Return the minimum arcs count choose in parameters.
         """        
-        return self.__MIN_ARCS_COUNT
+        return self.__MIN_TASK_DEGREE
 
-    def get_max_arcs_count(self):
+    def get_max_task_degree(self):
         """Return the maximum arcs count choose in parameters.
         """        
-        return self.__MAX_ARCS_COUNT
+        return self.__MAX_TASK_DEGREE
 
     # PHASES
     def get_min_phase_count(self):
@@ -282,6 +297,11 @@ class Parameters:
         """
         return self.__REENTRANT
 
+    def is_multi_arc(self):
+        """Return True if the dataflow has at least one reentrant arc.
+        """
+        return self.__MULTI_ARC
+
     def is_acyclic(self):
         """Return True if the dataflow is acyclic.
         """
@@ -313,6 +333,11 @@ class Parameters:
         return self.__LOGGING_LEVEL
     
     @staticmethod
-    def __verify_integer(value):
+    def __verify_integer_non_negativ(value):
         if int(value) < 0:
             raise Exception("Wrong value: it must be positive")
+
+    @staticmethod
+    def __verify_integer_non_null(value):
+        if int(value) < 1:
+            raise Exception("Wrong value: it must be non null")

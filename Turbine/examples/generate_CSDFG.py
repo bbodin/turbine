@@ -15,8 +15,8 @@ c_param.set_min_phase_count(1)
 c_param.set_max_phase_count(10)
 
 # Min/Max arcs count per task 
-c_param.set_min_arcs_count(1)
-c_param.set_max_arcs_count(5)
+c_param.set_min_task_degree(1)
+c_param.set_max_task_degree(3)
 
 # Number of task in the dataflow
 c_param.set_nb_task(100)

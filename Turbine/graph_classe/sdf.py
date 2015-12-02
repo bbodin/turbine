@@ -24,8 +24,10 @@ class SDF(Dataflow):
 
     def __str__(self):
         ret = super(SDF, self).__str__()
-        if self.get_arc_count() > 0:
-            ret += "\nNormalized: " + str(self.is_normalized) + "\n"
+        ret += "\nGraph type: "
+        if self.is_normalized:
+            ret += "Normalized "
+        ret += "SDF"
         return ret
 
     def __eq__(self, other):
@@ -194,7 +196,7 @@ class SDF(Dataflow):
     ########################################################################
     @property
     def is_consistent(self):
-        """Return True if the sdf is consistent.
+        """:return True if the sdf is consistent.
         """
         for arc in self.get_arc_list():
             source_w = self.get_prod_rate(arc) * self.get_repetition_factor(self.get_source(arc))

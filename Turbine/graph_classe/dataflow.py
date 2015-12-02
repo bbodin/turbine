@@ -40,12 +40,25 @@ class Dataflow(object):
         self.arcByName = {}
 
     def __str__(self):
-        ret = "name: " + str(self.name) + "\n"
-        ret += "task count: " + str(self.get_task_count()) + " arc count: " + str(self.get_arc_count()) + "\n"
+        ret = "Name: " + str(self.name) + "\n"
+        ret += "Graph Properties: "
+        if self.is_cyclic:
+            ret += "cyclic, "
+        else:
+            ret += "dag, "
+        if self.is_reentrant:
+            ret += "reentrant"
+        else:
+            ret += "not reentrant"
+        if self.is_multi_graph:
+            ret += ", multi-graph\n"
+        else:
+            ret += ", not multi-graph\n"
+        ret += "Task count: " + str(self.get_task_count()) + " arc count: " + str(self.get_arc_count()) + "\n"
         tot = 0
         for arc in self.get_arc_list():
             tot += self.get_initial_marking(arc)
-        ret += "tot initial marking: " + str(tot)
+        ret += "Tot initial marking: " + str(tot)
         return ret
 
     def set_name(self, name):
@@ -55,7 +68,6 @@ class Dataflow(object):
         nx.draw(self.nxg)
         import matplotlib.pyplot as plt
         plt.show()
-
 
     ########################################################################
     #                           add/modify tasks                           #
@@ -534,8 +546,8 @@ class Dataflow(object):
         :type lp_filename: str, if not None, the solver will write the linear program used to compute initial marking.
         :type period: int,
         """
-        compute_initial_marking(self, solver_str=solver_str, solver_verbose=solver_verbose, lp_filename=lp_filename,
-                            period=period)
+        compute_initial_marking(self, solver_str=solver_str, solver_verbose=solver_verbose,
+                                lp_filename=lp_filename, period=period)
 
     def compute_repetition_vector(self):
         return compute_rep_vect(self)

@@ -23,7 +23,13 @@ class CSDF(Dataflow):
 
     def __str__(self):
         ret = super(CSDF, self).__str__()
-        ret += "\nNormalized: " + str(self.is_normalized) + "\n"
+        ret += "\nGraph type: "
+        if self.is_normalized:
+            ret += "Normalized "
+        if self.is_pcg:
+            ret += "PCG"
+        else:
+            ret += "CSDF"
         return ret
 
     def __eq__(self, other):
