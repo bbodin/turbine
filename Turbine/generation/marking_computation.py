@@ -5,28 +5,25 @@ from Turbine.algorithms.solve_SC1_Kc import SolverSC1Kc
 from Turbine.algorithms.solve_SC2 import SolverSC2
 
 
-def __sum_initial_marking(dataflow):
-    tot = 0
-    for edge in dataflow.get_arc_list():
-        tot += dataflow.get_initial_marking(edge)
-    return tot
-
-
 ########################################################################
 #                           generate preload                           #
 ########################################################################
 def compute_initial_marking(dataflow, solver_str="Auto", solver_verbose=False, lp_filename=None, period=None):
     """Step 3
     """
+    coef_vector = None
     if not dataflow.is_normalized:
-        raise Exception("Dataflow must be normalized first !")
+        coef_vector = dataflow.normalized()
 
     dataflow.del_initial_marking()
     if solver_str == "None" or solver_str is None:
         return
 
     elif solver_str == "Auto":
-        if __cs2_row_count(dataflow) < __sc1_row_count(dataflow):
+        if period is not None and period != 0:
+            solver = SolverSC1Kc(dataflow, float(period), solver_verbose, lp_filename)
+            logging.info("choose solver SC1")
+        elif __cs2_row_count(dataflow) < __sc1_row_count(dataflow):
             solver = SolverSC2(dataflow, solver_verbose, lp_filename)
             logging.info("choose solver SC2")
         else:
@@ -50,12 +47,16 @@ def compute_initial_marking(dataflow, solver_str="Auto", solver_verbose=False, l
     else:
         raise Exception("Wrong solver argument: no solver called")
 
+    logging.info("Generating initial marking")
     solver.compute_initial_marking()
 
     m0tot = __calc_reentrant(dataflow)
     logging.info("Mem tot (reentrant): " + str(m0tot))
     del solver
-    
+
+    if coef_vector is not None:
+        dataflow.un_normalized(coef_vector)
+
 
 def __cs2_row_count(dataflow):
     f_row_count = dataflow.get_arc_count()
@@ -98,7 +99,7 @@ def __compute_reentrant_initial_marking(dataflow):
 
             step = dataflow.get_gcd(arc)
             m0 = sum(cons) - step
-            
+
             if m0 % step != 0 or m0 == 0:
                 m0 += (step - m0 % step)
 
@@ -125,9 +126,9 @@ def __calc_reentrant(dataflow):
                 prod_list = dataflow.get_ini_prod_rate_list(arc) + prod_list
                 cons_list = dataflow.get_ini_cons_rate_list(arc) + cons_list
                 threshold_list = dataflow.get_ini_threshold_list(arc) + dataflow.get_threshold_list(arc)
-        
+
             ret_max = cons_list[0]
-        
+
             pred_out = 0
             pred_in = 0
             in_v = 0
@@ -136,11 +137,11 @@ def __calc_reentrant(dataflow):
                     pred_out += prod_list[phase - 1]
                     pred_in += cons_list[phase - 1]
                 in_v += cons_list[phase]
-        
+
                 w = in_v - pred_out
                 if dataflow.get_dataflow_type() == "PCG":
                     w += pred_in + threshold_list[phase] - in_v
-        
+
                 if ret_max < w:
                     ret_max = w
                 dataflow.set_initial_marking(arc, ret_max)

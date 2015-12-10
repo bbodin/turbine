@@ -1,8 +1,9 @@
+import logging
 import os
 
+from generation.generate import generate
 from file_parser.sdf3_parser import write_sdf3_file, read_sdf3_file
 from file_parser.turbine_parser import write_tur_file, read_tur_file
-from generation.generate import generate
 from param.parameters import Parameters
 
 
@@ -15,12 +16,26 @@ def try_function(function, args):
         print "DONE !"
         return ret
 
-print "Starting basic expe_old !"
+
+def try_property(function):
+    try:
+        ret = function
+    except:
+        print "FAIL !"
+    else:
+        print "DONE !"
+        return ret
+
+
+print "Starting basic test !"
 
 print ""
 
 print "Acyclic SDF generation",
 c_param = Parameters()
+c_param.set_logging_level(logging.CRITICAL)
+c_param.set_multi_graph(True)
+c_param.set_reentrant(True)
 c_param.set_acyclic(True)
 try_function(generate, ("Test_of_SDFG", c_param))
 print "Cyclic SDF generation",
@@ -53,13 +68,18 @@ print "SC1_MIP on a SDF",
 try_function(SDF.compute_initial_marking, ("SC1_MIP", False, None, None))
 print "SC1_MIP_k on a SDF",
 try_function(SDF.compute_initial_marking, ("SC1_MIP", False, None, 1))
-print "Period computing on a SDF",
+print "Computing period on a SDF",
 try_function(SDF.get_period, [])
+print "Compute symbolic execution on a SDF",
+try_property(SDF.is_dead_lock)
 
 print ""
 
 print "Acyclic SDF generation",
 c_param.set_dataflow_type("CSDF")
+c_param.set_logging_level(logging.CRITICAL)
+c_param.set_multi_graph(True)
+c_param.set_reentrant(True)
 c_param.set_acyclic(True)
 try_function(generate, ("Test_of_CSDFG", c_param))
 print "Cyclic CSDF generation",
@@ -92,12 +112,17 @@ print "SC1_MIP on a CSDF",
 try_function(CSDF.compute_initial_marking, ("SC1_MIP", False, None, None))
 print "SC1_MIP_k on a CSDF",
 try_function(CSDF.compute_initial_marking, ("SC1_MIP", False, None, 1))
+print "Compute symbolic execution on a CSDF",
+try_property(CSDF.is_dead_lock)
 
 print ""
 
 print "Acyclic PCG generation",
 c_param.set_dataflow_type("PCG")
+c_param.set_logging_level(logging.CRITICAL)
 c_param.set_acyclic(True)
+c_param.set_multi_graph(True)
+c_param.set_reentrant(True)
 try_function(generate, ("Test_of_PCG", c_param))
 print "Cyclic PCG generation",
 c_param.set_acyclic(False)
@@ -116,7 +141,7 @@ try_function(read_tur_file, ["PCG.tur"])
 os.remove("PCG.tur")
 print "Un-normalized PCG",
 try_function(PCG.un_normalized, [])
-print "Normalized SDF",
+print "Normalized PCG",
 try_function(PCG.normalized, [])
 
 print "SC1 on a PCG",
@@ -129,6 +154,8 @@ print "SC1_MIP on a PCG",
 try_function(PCG.compute_initial_marking, ("SC1_MIP", False, None, None))
 print "SC1_MIP_k on a PCG",
 try_function(PCG.compute_initial_marking, ("SC1_MIP", False, None, 1))
+print "Compute symbolic execution on a PCG",
+try_property(PCG.is_dead_lock)
 
 try:
     os.remove("gurobi.log")

@@ -1,6 +1,4 @@
 import pydot
-from Partitioning.tools.graph_mod.csdf_to_sdf import get_csdf_into_sdf
-from Turbine.file_parser.turbine_parser import read_tur_file
 
 
 class Dot(object):

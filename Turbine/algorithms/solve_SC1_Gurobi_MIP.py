@@ -61,12 +61,7 @@ class SolveSC1GuMIP:
 
         # Create column lambda (v)
         for task in self.dataflow.get_task_list():
-            if self.dataflow.is_sdf:
-                phase_count = 1
-            if self.dataflow.is_csdf:
-                phase_count = self.dataflow.get_phase_count(task)
-            if self.dataflow.is_pcg:
-                phase_count += self.dataflow.get_ini_phase_count(task)
+            phase_count = self.__get_range_phases(task)
             for i in xrange(phase_count):
                 self.__add_col_v(str(task) + "/" + str(i))
 
@@ -80,8 +75,8 @@ class SolveSC1GuMIP:
         ########################################################################
         for arc in self.dataflow.get_arc_list():
             if not self.dataflow.is_arc_reentrant(arc):
-                step = self.dataflow.get_gcd(arc)
-                self.__add_frow(arc, step)
+                arc_gcd = self.dataflow.get_gcd(arc)
+                self.__add_frow(arc, arc_gcd)
 
         ########################################################################
         #                       Constraint u-u'+M0 >= W1+1                     #
@@ -96,7 +91,7 @@ class SolveSC1GuMIP:
                 cons_list = self.__get_cons_rate_list(arc)
                 if self.dataflow.is_pcg:
                     threshold_list = self.__get_threshold_list(arc)
-                step = self.dataflow.get_gcd(arc)
+                arc_gcd = self.dataflow.get_gcd(arc)
 
                 pred_prod = 0
                 for sourcePhase in xrange(range_source):  # source/prod/out normaux
@@ -110,7 +105,7 @@ class SolveSC1GuMIP:
                         if targetPhase > 0:
                             pred_cons += cons_list[targetPhase - 1]
 
-                        w = cons - pred_prod - step
+                        w = cons - pred_prod - arc_gcd
                         if self.dataflow.is_pcg:
                             w += pred_cons + threshold_list[targetPhase] - cons
 
@@ -165,7 +160,7 @@ class SolveSC1GuMIP:
     # Add a constraint: lambda1 - lambda2 + M0 > W1
     def __add_row(self, str_v1, str_v2, arc, w):
         expr = LinExpr()
-        if self.dataflow.get_source(arc) != self.dataflow.get_target(arc):
+        if not self.dataflow.is_arc_reentrant(arc):
             expr += self.col_v[str_v1]
             expr -= self.col_v[str_v2]
         expr += self.col_m0[arc]

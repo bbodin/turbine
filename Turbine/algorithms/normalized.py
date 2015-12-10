@@ -3,7 +3,7 @@ from math import ceil
 
 from numpy.random.mtrand import randint
 
-from Turbine.calc.lcm import lcm, lcm_list
+from Turbine.calc.lcm import lcm
 
 
 def normalized_dataflow(dataflow):
@@ -74,6 +74,7 @@ def get_normalized_vector(dataflow):
     coef_list = {}
 
     lcm_rf = 1
+    lcm_post_mult = 1
     for task in dataflow.get_task_list():
         lcm_rf = lcm(lcm_rf, dataflow.get_repetition_factor(task))
     for arc in dataflow.get_arc_list():
@@ -85,6 +86,12 @@ def get_normalized_vector(dataflow):
         # print lcm_rf, "t"+str(dataflow.get_source(arc)), dataflow.get_repetition_factor(dataflow.get_source(arc))
         # print str(arc[0])+"->"+str(arc[1]), "zi", zi, "rate", rate, "ka", Fraction(numerator=zi, denominator=rate)
         coef_list[arc] = Fraction(numerator=zi, denominator=rate)
+        if dataflow.is_csdf:
+            for phase in dataflow.get_prod_rate_list(arc) + dataflow.get_cons_rate_list(arc):
+                if float(coef_list[arc]) * float(phase) != int(coef_list[arc] * phase):
+                    lcm_post_mult = lcm(lcm_post_mult, coef_list[arc].denominator)
+    for arc in dataflow.get_arc_list():
+        coef_list[arc] *= lcm_post_mult
     return coef_list
 
 

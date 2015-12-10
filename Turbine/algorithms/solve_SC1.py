@@ -3,7 +3,6 @@ from glpk import *
 
 
 class SolverSC1:
-
     def __init__(self, dataflow, verbose, lp_filename):
         self.dataflow = dataflow
         self.verbose = verbose
@@ -11,8 +10,8 @@ class SolverSC1:
 
         self.colV = {}  # dict use for storing gamma's variable column
         self.col_m0 = {}  # dict use for storing bds's variable column
-        self.colFM0 = {}  # dict use for storing FM0's variable column
-        
+        self.col_fm0 = {}  # dict use for storing FM0's variable column
+
     def compute_initial_marking(self):
         self.__init_prob()  # Modify parameters
         self.__create_col()  # Add Col on prob
@@ -23,6 +22,7 @@ class SolverSC1:
 
     def __init_prob(self):  # Modify parameters
         logging.info("Generating initial marking problem")
+
         self.prob = glp_create_prob()
         glp_set_prob_name(self.prob, "min_preload")
         glp_set_obj_dir(self.prob, GLP_MIN)
@@ -30,7 +30,7 @@ class SolverSC1:
         # GLPK parameters:
         self.glpk_param = glp_smcp()
         glp_init_smcp(self.glpk_param)  # Do it before modify parameters
-        
+
         self.glpk_param.presolve = GLP_ON
         self.glpk_param.msg_lev = GLP_MSG_ALL
         if not self.verbose:
@@ -66,7 +66,7 @@ class SolverSC1:
         for arc in self.dataflow.get_arc_list():
             self.__add_col_fm0(col, "FM0" + str(arc), arc)
             col += 1
-            
+
         # Create column lambda (v)
         for task in self.dataflow.get_task_list():
             phase_count = 1
@@ -84,7 +84,7 @@ class SolverSC1:
         for arc in self.dataflow.get_arc_list():
             if self.dataflow.is_arc_reentrant(arc):
                 f_row_count -= 1
-                
+
         row_count = 0
         for arc in self.dataflow.get_arc_list():
             source = self.dataflow.get_source(arc)
@@ -95,8 +95,10 @@ class SolverSC1:
                 if self.dataflow.is_csdf and not self.dataflow.is_pcg:
                     row_count += self.dataflow.get_phase_count(source) * self.dataflow.get_phase_count(target)
                 if self.dataflow.is_pcg:
-                    source_phase_count = self.dataflow.get_phase_count(source)+self.dataflow.get_ini_phase_count(source)
-                    target_phase_count = self.dataflow.get_phase_count(target)+self.dataflow.get_ini_phase_count(target)
+                    source_phase_count = self.dataflow.get_phase_count(source) + self.dataflow.get_ini_phase_count(
+                        source)
+                    target_phase_count = self.dataflow.get_phase_count(target) + self.dataflow.get_ini_phase_count(
+                        target)
                     row_count += source_phase_count * target_phase_count
 
         # Create row
@@ -117,8 +119,8 @@ class SolverSC1:
         ########################################################################
         for arc in self.dataflow.get_arc_list():
             if not self.dataflow.is_arc_reentrant(arc):
-                step = self.dataflow.get_gcd(arc)
-                self.__add_f_row(row, arc, step)
+                arc_gcd = self.dataflow.get_gcd(arc)
+                self.__add_f_row(row, arc, arc_gcd)
                 row += 1
 
         ########################################################################
@@ -134,12 +136,12 @@ class SolverSC1:
                 cons_list = self.__get_cons_rate_list(arc)
                 if self.dataflow.is_pcg:
                     threshold_list = self.__get_threshold_list(arc)
-                step = self.dataflow.get_gcd(arc)
+                arc_gcd = self.dataflow.get_gcd(arc)
 
                 pred_prod = 0
-                for sourcePhase in xrange(range_source):  # source/prod/out normaux
-                    if sourcePhase > 0:
-                        pred_prod += prod_list[sourcePhase - 1]
+                for source_phase in xrange(range_source):  # source/prod/out normaux
+                    if source_phase > 0:
+                        pred_prod += prod_list[source_phase - 1]
 
                     pred_cons = 0
                     cons = 0
@@ -148,16 +150,16 @@ class SolverSC1:
                         if target_phase > 0:
                             pred_cons += cons_list[target_phase - 1]
 
-                        w = cons - pred_prod - step
+                        w = cons - pred_prod - arc_gcd
                         if self.dataflow.is_pcg:
                             w += pred_cons + threshold_list[target_phase] - cons
 
-                        str_v1 = str(source) + "/" + str(sourcePhase)
+                        str_v1 = str(source) + "/" + str(source_phase)
                         str_v2 = str(target) + "/" + str(target_phase)
 
                         self.__add_row(row, str_v1, str_v2, arc, w)
                         row += 1
-        # END FILL ROW
+                        # END FILL ROW
 
     def __solve_prob(self):  # Launch the solver and set preload of the graph
         logging.info("loading matrix ...")
@@ -174,7 +176,7 @@ class SolverSC1:
         if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
             for arc in self.dataflow.get_arc_list():
                 logging.debug(str(arc) + " M0: " + str(glp_get_col_prim(self.prob, self.col_m0[arc])) +
-                              " FM0: " + str(glp_get_col_prim(self.prob, self.colFM0[arc])))
+                              " FM0: " + str(glp_get_col_prim(self.prob, self.col_fm0[arc])))
             for arc in self.dataflow.get_arc_list():
                 source = self.dataflow.get_source(arc)
                 target = self.dataflow.get_target(arc)
@@ -195,18 +197,17 @@ class SolverSC1:
         for arc in self.dataflow.get_arc_list():
             if not self.dataflow.is_arc_reentrant(arc):
                 buf = glp_get_col_prim(self.prob, self.col_m0[arc])
-                fm0 = glp_get_col_prim(self.prob, self.colFM0[arc])
-                step = self.dataflow.get_gcd(arc)
-
+                fm0 = glp_get_col_prim(self.prob, self.col_fm0[arc])
+                gcd = self.dataflow.get_gcd(arc)
+                # print arc, "buf", buf, "fm0", fm0
                 if fm0 % 1 == 0:
                     self.dataflow.set_initial_marking(arc, int(buf))
                     buf_rev_tot += int(buf)
-
                 else:
                     opt_buffer = False
-                    self.dataflow.set_initial_marking(arc, int(fm0 + 1) * step)
-                    buf_rev_tot += int(fm0 + 1) * step
-        
+                    self.dataflow.set_initial_marking(arc, int(fm0 + 1) * gcd)
+                    buf_rev_tot += int(fm0 + 1) * gcd
+
         logging.info("SC1 Mem tot (no reentrant): " + str(self.Z) + " REV: " + str(buf_rev_tot))
         if opt_buffer:
             logging.info("Solution SC1 Optimal !!")
@@ -233,7 +234,7 @@ class SolverSC1:
         glp_set_col_name(self.prob, col, name)
         glp_set_col_bnds(self.prob, col, GLP_LO, 0, 0)
         glp_set_obj_coef(self.prob, col, 0.0)
-        self.colFM0[arc] = col
+        self.col_fm0[arc] = col
 
     # Add a constraint: lambda1 - lambda2 + M0 > W1
     def __add_row(self, row, str_v1, str_v2, arc, w):
@@ -259,7 +260,7 @@ class SolverSC1:
     # Add a constraint: FM0*step = M0
     def __add_f_row(self, row, arc, step):
         self.var_row[self.k] = row
-        self.var_col[self.k] = self.colFM0[arc]
+        self.var_col[self.k] = self.col_fm0[arc]
         self.var_coef[self.k] = float(step)
         self.k += 1
 
@@ -267,7 +268,7 @@ class SolverSC1:
         self.var_col[self.k] = self.col_m0[arc]
         self.var_coef[self.k] = -1.0
         self.k += 1
-        
+
         glp_set_row_bnds(self.prob, row, GLP_FX, 0.0, 0.0)
         glp_set_row_name(self.prob, row, "step" + str(arc))
 

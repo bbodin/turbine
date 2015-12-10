@@ -93,14 +93,14 @@ class SymbolicExe:
 
             # If nothing append the initial marking is wrong:-(
             if task_execute == 0:
-                logging.error("No task executed:-/, iteration: " + str(i))
-                logging.error("Arcs exe: " + str(self.arcExe))
+                logging.info("No task executed:-/, iteration: " + str(i))
+                logging.info("Arcs exe: " + str(self.arcExe))
                 logging.debug("number of exe: " + str(num_task_exe))
                 return -1
             i += 1
         fin = time.time()
         logging.info("Symbolic execution succeed in " + str(fin - debut) + "s, with " + str(i) + " iterations")
-        return 0  # Exe successful 
+        return 0  # Exe successful
 
     # Used when __init__ is called
     # Initialized preload and phases

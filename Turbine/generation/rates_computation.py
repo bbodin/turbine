@@ -1,13 +1,9 @@
 from fractions import gcd
+from Turbine.calc.lcm import lcm
 from random import shuffle, randint, sample
 import logging
 
 import numpy
-
-from Turbine.calc.lcm import lcm
-from Turbine.graph_classe.csdf import CSDF
-from Turbine.graph_classe.pcg import PCG
-from Turbine.graph_classe.sdf import SDF
 
 
 def constrained_sum_sample_pos(n, total):
@@ -37,7 +33,7 @@ def generate_rates(dataflow, c_param):
     """
     __generate_rv(dataflow, c_param)  # generate the repetition vector
     __generate_rates(dataflow, c_param)  # generate weight vectors
-    if isinstance(dataflow, PCG):
+    if dataflow.is_pcg:
         __generate_threshold_lists(dataflow)
         __generate_initial_phase_lists(dataflow, c_param)  # generate initial vectors
 
@@ -52,8 +48,8 @@ def __generate_rv(dataflow, c_param):
 
     n = dataflow.get_task_count()
     div = numpy.random.exponential(0.25)
-    div = n+int(div*n)
-    rv_list = numpy.random.multinomial(sum_rv, numpy.ones(n)/div)
+    div = n + int(div * n)
+    rv_list = numpy.random.multinomial(sum_rv, numpy.ones(n) / div)
 
     for rv_rang in xrange(len(rv_list)):  # A modifier
         if rv_list[rv_rang] == 0:
@@ -82,7 +78,7 @@ def __generate_rv(dataflow, c_param):
 def __generate_rates(dataflow, c_param):
     """Generate weights of the dataflow.
     """
-    logging.info("Generate task phase lists")
+    logging.info("Generate task wight")
     k = 0
 
     lcm_value = 1
@@ -97,14 +93,14 @@ def __generate_rates(dataflow, c_param):
             raise Exception("__generate_phase_lists",
                             "null rate when generating, this Exception should never occur...")
 
-        if isinstance(dataflow, SDF):
+        if dataflow.is_sdf:
             duration = constrained_sum_sample_pos(1, randint(1, c_param.get_average_time() * 2 - 1))[0]
             dataflow.set_task_duration(task, duration)
             for arc in dataflow.get_arc_list(source=task):
                 dataflow.set_prod_rate(arc, zi)
             for arc in dataflow.get_arc_list(target=task):
                 dataflow.set_cons_rate(arc, zi)
-        if isinstance(dataflow, CSDF):
+        if dataflow.is_csdf:
             phase_count = randint(c_param.get_min_phase_count(), c_param.get_max_phase_count())
             phase_duration_list = constrained_sum_sample_pos(
                 phase_count, randint(1, c_param.get_average_time() * phase_count * 2 - 1))
@@ -130,7 +126,7 @@ def __generate_rates(dataflow, c_param):
 
         if dataflow.get_task_count() > 1000 and k % 1000 == 0:
             logging.info(str(k) + "/" + str(dataflow.get_task_count()) + " tasks weigth generation complete.")
-        k += 1 
+        k += 1
 
 
 def __generate_threshold_lists(dataflow):
@@ -180,10 +176,10 @@ def __generate_initial_phase_lists(dataflow, c_param):
         for arc in dataflow.get_arc_list(target=task):
             cons_ini_list = constrained_sum_sample_pos(phase_count_init, ini_zi)
             dataflow.set_ini_cons_rate_list(arc, cons_ini_list)
-            if isinstance(dataflow, PCG):
+            if dataflow.is_pcg:
                 cons_ini_threshold_list = constrained_sum_sample_pos(phase_count_init, ini_zi)
                 dataflow.set_ini_threshold_list(arc, cons_ini_threshold_list)
-            
+
         if dataflow.get_task_count() > 1000 and k % 1000 == 0:
             logging.info(str(k) + "/" + str(dataflow.get_task_count()) + " tasks initial weigth generation complete.")
         k += 1

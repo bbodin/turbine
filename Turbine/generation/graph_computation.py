@@ -1,7 +1,5 @@
 from random import *
 import logging
-import networkx as nx
-from Partitioning.tools.dot_graph.draw_dot import Dot
 
 from Turbine.graph_classe.csdf import CSDF
 from Turbine.graph_classe.pcg import PCG

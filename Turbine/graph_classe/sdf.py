@@ -1,7 +1,7 @@
 from fractions import gcd
 
 from Turbine.graph_classe.dataflow import Dataflow
-from Turbine.period.period_computation import ComputePeriod
+from Turbine.algorithms.period_computation import ComputePeriod
 
 
 class SDF(Dataflow):

@@ -229,7 +229,7 @@ def parse_sdf3_application_graph(elem, dataflow):
 
     # Get name
     if not elem.get("name") is None:
-        dataflow.setName(elem.get("name"))
+        dataflow.set_name(elem.get("name"))
 
     # Read sdfProperties node (to do before sdf to resolve phase count and task)
     pdone = False

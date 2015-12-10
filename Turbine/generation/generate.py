@@ -1,5 +1,5 @@
 import logging
-import time
+from time import time
 
 from marking_computation import compute_initial_marking
 from rates_computation import generate_rates
@@ -19,19 +19,15 @@ def generate(dataflow_name="generated_graph", c_param=None):
     if c_param is None:
         c_param = Parameters()
 
-    start = time.time()
+    start = time()
     logging.info("Generating graph")
     dataflow = generate_dataflow(dataflow_name, c_param)
     logging.info("Generating weight")
     generate_rates(dataflow, c_param)
-    logging.info("Generating initial marking")
     compute_initial_marking(dataflow,
                             solver_str=c_param.get_solver(),
                             solver_verbose=c_param.is_solver_verbose(),
                             lp_filename=c_param.get_lp_filenam())
 
-    if not c_param.is_normalized():
-        dataflow.un_normalized()
-
-    logging.info("Generating done : " + str(time.time() - start) + "s")
+    logging.info("Generating done : " + str(time() - start) + "s")
     return dataflow

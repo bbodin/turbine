@@ -27,4 +27,5 @@ c_param.set_nb_task(100)
 
 print "###### Generate PCG dataflow ########"
 PCG = generate("Test_of_SDFG", c_param)
+PCG.compute_repetition_vector()
 print PCG

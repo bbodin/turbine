@@ -3,7 +3,6 @@ Example of how to write and read TUR files.
 
 TUR files are not XML, they are 10 times smaller than SDF3 files and easy to write by hand.
 """
-from Turbine.file_parser.turbine_parser import write_tur_file, read_tur_file
 from Turbine.generation.generate import generate
 from Turbine.param.parameters import Parameters
 
@@ -26,5 +25,5 @@ print SDFG
 print "####### Un-normalized graph #########"
 # The graph can be un-normalized with a random vector if you put no parameters in the function un_normalized()
 # Here we want to retrieve the original generated graph so we call the un_normalization with the proper argument
-coef_vector = SDFG.un_normalized(coef_vector)
+SDFG.un_normalized(coef_vector)
 print SDFG

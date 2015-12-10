@@ -5,12 +5,11 @@ from glpk import *
 
 
 class SolverSC2:
-
     def __init__(self, graph, verbose, lp_filename):
         self.dataflow = graph
         self.verbose = verbose
         self.lp_filename = lp_filename
-        
+
         self.colv = {}  # dict use for storing gamma's variable column
         self.col_m0 = {}  # dict use for storing bds's variable column
         self.col_fm0 = {}  # dict use for storing FM0's variable column
@@ -22,7 +21,7 @@ class SolverSC2:
         self.__solve_prob()  # Launch the solver and set preload of the graph
         del self.prob  # Del prob
         return self.Z  # Return the total amount find by the solver
-        
+
     def __init_prob(self):  # Modify parameters
         logging.info("Generating problem...")
         self.prob = glp_create_prob()
@@ -75,7 +74,7 @@ class SolverSC2:
             row_count += (
                 (self.dataflow.get_input_degree(task) - task_reentrant) *
                 (self.dataflow.get_output_degree(task) - task_reentrant))
-                    
+
         # Create row
         logging.info("Number of rows: " + str(row_count + f_row_count))
         glp_add_rows(self.prob, row_count + f_row_count)
@@ -105,17 +104,17 @@ class SolverSC2:
             for arc_in in self.dataflow.get_arc_list(target=task):
                 if not self.dataflow.is_arc_reentrant(arc_in):
                     step = self.dataflow.get_gcd(arc_in)
-                    for arcOut in self.dataflow.get_arc_list(source=task):
-                        if not self.dataflow.is_arc_reentrant(arcOut):
-                            max_v = self.__get_max(arc_in, arcOut)
-                            
+                    for arc_out in self.dataflow.get_arc_list(source=task):
+                        if not self.dataflow.is_arc_reentrant(arc_out):
+                            max_v = self.__get_max(arc_in, arc_out)
+
                             str_v1 = "v" + str(arc_in)
-                            str_v2 = "v" + str(arcOut)
+                            str_v2 = "v" + str(arc_out)
 
                             w = max_v - step
                             self.__add_row(row, str_v1, str_v2, arc_in, w)
                             row += 1
-        # END FILL ROW
+                            # END FILL ROW
 
     def __solve_prob(self):  # Launch the solver and set preload of the graph
         glp_load_matrix(self.prob, self.var_array_size - 1, self.var_row, self.var_col, self.var_coef)
@@ -124,9 +123,9 @@ class SolverSC2:
             problem_location = str(glp_write_lp(self.prob, None, self.lp_filename))
             logging.info("Writing problem: " + str(problem_location))
 
-        logging.info("solving problem ...") 
+        logging.info("solving problem ...")
         ret = str(glp_simplex(self.prob, self.glpkParam))
-        logging.info("Solveur return: " + ret) 
+        logging.info("Solveur return: " + ret)
 
         self.Z = glp_get_obj_val(self.prob)
 
@@ -208,7 +207,7 @@ class SolverSC2:
         self.var_col[self.k] = self.col_m0[arc]
         self.var_coef[self.k] = -1.0
         self.k += 1
-        
+
         glp_set_row_bnds(self.prob, row, GLP_FX, 0.0, 0.0)
         glp_set_row_name(self.prob, row, "step" + str(arc))
 

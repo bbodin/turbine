@@ -130,7 +130,7 @@ class Parameters:
         default: 2
         """        
         self.__verify_integer_non_negativ(value)
-        if value < self.get_min_ini_phase_count():
+        if value < self.get_min_phase_count_ini():
             raise Exception("Max must be higher than min value")
         self.__MAX_INI_PHASE_COUNT = int(value)
 

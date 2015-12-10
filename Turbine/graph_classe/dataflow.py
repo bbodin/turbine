@@ -54,7 +54,7 @@ class Dataflow(object):
             ret += ", multi-graph\n"
         else:
             ret += ", not multi-graph\n"
-        ret += "Task count: " + str(self.get_task_count()) + " arc count: " + str(self.get_arc_count()) + "\n"
+        ret += "Task count: " + str(self.get_task_count()) + ", Arc count: " + str(self.get_arc_count()) + "\n"
         tot = 0
         for arc in self.get_arc_list():
             tot += self.get_initial_marking(arc)
