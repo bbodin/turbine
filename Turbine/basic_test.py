@@ -17,9 +17,9 @@ def try_function(function, args):
         return ret
 
 
-def try_property(function):
+def try_property(prop):
     try:
-        ret = function
+        ret = prop
     except:
         print "FAIL !"
     else:

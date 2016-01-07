@@ -3,7 +3,6 @@ Example of how to write and read TUR files.
 
 TUR files are not XML, they are 10 times smaller than SDF3 files and easy to write by hand.
 """
-from Turbine.draw.draw_dot import Dot
 from Turbine.generation.generate import generate
 from Turbine.param.parameters import Parameters
 
@@ -18,6 +17,6 @@ print "###### Generate dataflow ############"
 SDFG = generate("Test_of_SDF", c_param)
 
 print "####### Draw File ###################"
-d = Dot(SDFG)
-d.write_pdf("test")
+# Work with CSDF or PCG as well !
+SDFG.draw_to_pdf("pdfname")  # without .pdf !
 print SDFG

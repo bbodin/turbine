@@ -69,6 +69,12 @@ class Dataflow(object):
         import matplotlib.pyplot as plt
         plt.show()
 
+    def draw_to_pdf(self, name="dataflow"):
+        from Turbine.draw.draw_dot import Dot
+        d = Dot(self)
+        d.write_pdf(name)
+
+
     ########################################################################
     #                           add/modify tasks                           #
     ########################################################################

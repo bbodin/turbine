@@ -246,12 +246,12 @@ class CSDF(Dataflow):
         result = str([int(i) for i in self.get_phase_duration_list(task)])[1:-1]
         return result.replace(" ", "")
 
-    def get_period(self, print_start_time=False):
+    def get_period(self):
         coef_vector = None
         if not self.is_normalized:
             coef_vector = self.normalized()
-        pc = ComputePeriod(self)
-        ret = pc.compute_period(print_start_time)
+        pc = ComputePeriod(self, lp_filename=None)
+        ret = pc.compute_period()
         if coef_vector is not None:
             self.un_normalized(coef_vector)
         return ret

@@ -18,9 +18,16 @@ class Dot(object):
                 prod = self.dataflow.get_task_name(arc[0])
                 cons = self.dataflow.get_task_name(arc[1])
 
-                dot_prod = pydot.Node(prod, style="bold", color="Blue")
+                if self.dataflow.is_sdf:
+                    task_duration_s = self.dataflow.get_task_duration(arc[0])
+                    task_duration_t = self.dataflow.get_task_duration(arc[1])
+                if self.dataflow.is_csdf:
+                    task_duration_s = self.dataflow.get_phase_duration_list(arc[0])
+                    task_duration_t = self.dataflow.get_phase_duration_list(arc[1])
+
+                dot_prod = pydot.Node(prod+str(task_duration_s), style="bold", color="Blue")
                 self._dotGraph.add_node(dot_prod)
-                dot_cons = pydot.Node(cons, style="bold", color="Blue")
+                dot_cons = pydot.Node(cons+str(task_duration_t), style="bold", color="Blue")
                 self._dotGraph.add_node(dot_cons)
                 dot_buf = pydot.Node(buf, fontcolor="Red", shape="box", sides=4, color="Red")
                 self._dotGraph.add_node(dot_buf)

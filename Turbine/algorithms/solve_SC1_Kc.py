@@ -56,7 +56,6 @@ class SolverSC1Kc:
             self.glpk_param.msg_lev = GLP_MSG_OFF
         self.glpk_param.meth = GLP_DUALP
         self.glpk_param.out_frq = 2000  # consol print frequency
-        # ~ self.glpkParam.tm_lim =300000#time limit in millisecond (5min)
 
     def __create_col(self):  # Add Col on prob
         # Counting column

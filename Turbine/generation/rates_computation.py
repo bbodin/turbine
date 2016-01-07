@@ -50,17 +50,7 @@ def __generate_rv(dataflow, c_param):
     div = numpy.random.exponential(0.25)
     div = n + int(div * n)
     rv_list = numpy.random.multinomial(sum_rv, numpy.ones(n) / div)
-
-    for rv_rang in xrange(len(rv_list)):  # A modifier
-        if rv_list[rv_rang] == 0:
-            rang = 0
-            go = True
-            while go:
-                if rv_list[rang] > 1:
-                    rv_list[rang] -= 1
-                    go = False
-                rang += 1
-            rv_list[rv_rang] += 1
+    __get_non_zero_list(rv_list)
 
     # Modify the two last integers of the list to get a gcd equal to 1
     if gcd_value != 1:
@@ -94,7 +84,7 @@ def __generate_rates(dataflow, c_param):
                             "null rate when generating, this Exception should never occur...")
 
         if dataflow.is_sdf:
-            duration = constrained_sum_sample_pos(1, randint(1, c_param.get_average_time() * 2 - 1))[0]
+            duration = randint(1, c_param.get_average_time() * 2 - 1)
             dataflow.set_task_duration(task, duration)
             for arc in dataflow.get_arc_list(source=task):
                 dataflow.set_prod_rate(arc, zi)
@@ -104,6 +94,7 @@ def __generate_rates(dataflow, c_param):
             phase_count = randint(c_param.get_min_phase_count(), c_param.get_max_phase_count())
             phase_duration_list = constrained_sum_sample_pos(
                 phase_count, randint(1, c_param.get_average_time() * phase_count * 2 - 1))
+            __get_non_zero_list(phase_duration_list)
 
             dataflow.set_phase_count(task, phase_count)
             dataflow.set_phase_duration_list(task, phase_duration_list)
@@ -163,6 +154,7 @@ def __generate_initial_phase_lists(dataflow, c_param):
             continue
         phase_duration_ini_list = constrained_sum_sample_pos(
             phase_count_init, randint(1, c_param.get_average_time_ini() * phase_count_init * 2 - 1))
+        __get_non_zero_list(phase_duration_ini_list)
         dataflow.set_ini_phase_count(task, phase_count_init)
         dataflow.set_ini_phase_duration_list(task, phase_duration_ini_list)
 
@@ -183,3 +175,19 @@ def __generate_initial_phase_lists(dataflow, c_param):
         if dataflow.get_task_count() > 1000 and k % 1000 == 0:
             logging.info(str(k) + "/" + str(dataflow.get_task_count()) + " tasks initial weigth generation complete.")
         k += 1
+
+
+def __get_non_zero_list(random_list):
+    for i in xrange(len(random_list)):  # A modifier
+        if random_list[i] == 0:
+            rang = 0
+            go = True
+            try:
+                while go:
+                    if random_list[rang] > 1:
+                        random_list[rang] -= 1
+                        go = False
+                    rang += 1
+            except IndexError:
+                pass
+            random_list[i] += 1

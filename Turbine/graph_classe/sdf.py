@@ -181,12 +181,12 @@ class SDF(Dataflow):
         """
         return str(self.get_task_duration(task))
 
-    def get_period(self, print_start_time=False):
+    def get_period(self):
         coef_vector = None
         if not self.is_normalized:
             coef_vector = self.normalized()
         pc = ComputePeriod(self)
-        ret = pc.compute_period(print_start_time)
+        ret = pc.compute_period()
         if coef_vector is not None:
             self.un_normalized(coef_vector)
         return ret
