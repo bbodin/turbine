@@ -31,6 +31,8 @@ class ComputePeriod:
         self.__create_col()  # Add Col on prob
         self.__create_row()  # Add Row (constraint) on prob
         ret = self.__solve_prob()  # Launch the solver and set preload of the graph
+        glp_delete_prob(self.prob)
+        glp_free_env()
         del self.prob  # Del prob
         return ret
 

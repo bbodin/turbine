@@ -17,6 +17,8 @@ class SolverSC1:
         self.__create_col()  # Add Col on prob
         self.__create_row()  # Add Row (constraint) on prob
         self.__solve_prob()  # Launch the solver and set preload of the graph
+        glp_delete_prob(self.prob)
+        glp_free_env()
         del self.prob  # Del prob
         return self.Z  # Return the total amount find by the solver
 

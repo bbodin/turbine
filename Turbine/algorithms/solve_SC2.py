@@ -19,6 +19,8 @@ class SolverSC2:
         self.__create_col()  # Add Col on prob
         self.__create_row()  # Add Row (constraint) on prob
         self.__solve_prob()  # Launch the solver and set preload of the graph
+        glp_delete_prob(self.prob)
+        glp_free_env()
         del self.prob  # Del prob
         return self.Z  # Return the total amount find by the solver
 
@@ -128,7 +130,6 @@ class SolverSC2:
         logging.info("Solveur return: " + ret)
 
         self.Z = glp_get_obj_val(self.prob)
-
         opt_buffer = True
         buf_rev_tot = 0
 
