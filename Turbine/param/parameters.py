@@ -178,7 +178,7 @@ class Parameters:
         """
         self.__REENTRANT = bool(value)
 
-    def set_multi_graph(self, value):
+    def set_multi_arc(self, value):
         """
 
         :type value: bool

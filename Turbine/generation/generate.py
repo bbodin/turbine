@@ -15,9 +15,9 @@ def generate(dataflow_name="generated_graph", c_param=None):
     graphName : the name of the dataflow (default : generated_graph).
     c_param : parameters of the generation.
     """
-    logging.basicConfig(level=c_param.get_logging_level())
     if c_param is None:
         c_param = Parameters()
+    logging.basicConfig(level=c_param.get_logging_level())
 
     start = time()
     logging.info("Generating graph")
