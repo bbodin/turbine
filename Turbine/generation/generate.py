@@ -7,7 +7,7 @@ from graph_computation import generate_dataflow
 from Turbine.param.parameters import Parameters
 
 
-def generate(dataflow_name="generated_graph", c_param=None):
+def generate(dataflow_name="generated_graph", c_param=None, nx_graph=None):
     """Generate a dataflow graph according to the parameters c_param
     
     Parameters
@@ -21,7 +21,7 @@ def generate(dataflow_name="generated_graph", c_param=None):
 
     start = time()
     logging.info("Generating graph")
-    dataflow = generate_dataflow(dataflow_name, c_param)
+    dataflow = generate_dataflow(dataflow_name, c_param, nx_graph)
     logging.info("Generating weight")
     generate_rates(dataflow, c_param)
     compute_initial_marking(dataflow,

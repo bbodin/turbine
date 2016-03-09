@@ -9,7 +9,7 @@ from Turbine.graph_classe.sdf import SDF
 ########################################################################
 #                           generate graph                             #
 ########################################################################
-def generate_dataflow(dataflow_name, c_param):
+def generate_dataflow(dataflow_name, c_param, nx_graph=None):
     """Step 1
     """
     if c_param.get_dataflow_type() == "SDF":
@@ -18,15 +18,22 @@ def generate_dataflow(dataflow_name, c_param):
         dataflow = CSDF(dataflow_name)
     if c_param.get_dataflow_type() == "PCG":
         dataflow = PCG(dataflow_name)
-    if c_param.is_acyclic():
-        # Generate a connected acyclic graph
-        task_rank, task_degree, task_to_rm = __generate_connex_dag(dataflow, c_param)
-        # Add arcs such as the graph stay acyclic
-        __generate_arcs_dag(dataflow, c_param, task_rank, task_degree, task_to_rm)
+    if nx_graph is None:
+        if c_param.is_acyclic():
+            # Generate a connected acyclic graph
+            task_rank, task_degree, task_to_rm = __generate_connex_dag(dataflow, c_param)
+            # Add arcs such as the graph stay acyclic
+            __generate_arcs_dag(dataflow, c_param, task_rank, task_degree, task_to_rm)
+        else:
+            task_degree = __generate_connex_graph(dataflow, c_param)  # Generate simple connected graph
+            __generate_arcs(dataflow, c_param, task_degree)  # Add arcs
+        return dataflow
     else:
-        task_degree = __generate_connex_graph(dataflow, c_param)  # Generate simple connected graph
-        __generate_arcs(dataflow, c_param, task_degree)  # Add arcs
-    return dataflow
+        for node in nx_graph.nodes_iter():
+            dataflow.add_task(name=node)
+        for edge in nx_graph.edges_iter():
+            dataflow.add_arc(source=edge[0], target=edge[1])
+        return dataflow
 
 
 def __generate_connex_graph(dataflow, c_param):
