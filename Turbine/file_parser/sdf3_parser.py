@@ -9,7 +9,7 @@ from Turbine.graph_classe.sdf import SDF
 
 
 # indent ElementTree
-def indent(elem, level=0):
+def __indent(elem, level=0):
     i = "\n" + level * "  "
     if len(elem):
         if not elem.text or not elem.text.strip():
@@ -17,7 +17,7 @@ def indent(elem, level=0):
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
-            indent(elem, level + 1)
+            __indent(elem, level + 1)
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
     else:
@@ -25,13 +25,13 @@ def indent(elem, level=0):
             elem.tail = i
 
 
-def str_to_int(rate):
+def __str_to_int(rate):
     if rate == '':
         return 0
     return float(rate)
 
 
-def str_to_doubleint(rate):
+def __str_to_doubleint(rate):
     if rate == '':
         return 0, 0
     r = rate.split(':')
@@ -41,7 +41,20 @@ def str_to_doubleint(rate):
     return int(r[0]), int(r[0])
 
 
-def split_init_cyclo_durations(durations):
+def __str_vector(value):
+    temp = value.split(',')
+    ret = []
+    for value in temp:
+        if '*' in value:
+            v = value.split('*')[1]
+            for _ in xrange(int(value.split('*')[0])):
+                ret.append(v)
+        else:
+            ret.append(value)
+    return ret
+
+
+def __split_init_cyclo_durations(durations):
     initcyclo = durations.split(';')
     if len(initcyclo) > 2:
         raise BaseException("Bad rate format")
@@ -50,14 +63,14 @@ def split_init_cyclo_durations(durations):
     initcyclo.insert(0, '')
     cyclo = initcyclo.pop()
     init = initcyclo.pop()
-    linit = [str_to_int(x) for x in init.split(',')]
-    lcyclo = [str_to_int(x) for x in cyclo.split(',')]
+    linit = [__str_to_int(x) for x in __str_vector(init)]
+    lcyclo = [__str_to_int(x) for x in __str_vector(cyclo)]
     if init == '':
         linit = []  # TODO: horrible fix
     return linit, lcyclo
 
 
-def split_init_cyclo_rates(rates):
+def __split_init_cyclo_rates(rates):
     initcyclo = rates.split(';')
 
     if len(initcyclo) > 2:
@@ -71,7 +84,9 @@ def split_init_cyclo_rates(rates):
         linit = init.split(',')
     else:
         linit = []
-    lcyclo = cyclo.split(',')
+
+    lcyclo = __str_vector(cyclo)
+
     rinit = []
     tinit = []
     for value in linit:
@@ -101,13 +116,13 @@ def split_init_cyclo_rates(rates):
 #    <executionTime time='1;3,1'/> le point virgule entre les phases d'init et les phases normales
 #  </processor>
 # </actorProperties>
-def parse_sdf3_actor_properties(elem, dataflow, task_ref):
+def __parse_sdf3_actor_properties(elem, dataflow, task_ref):
     for p in elem.getiterator("actorProperties"):  # get the first one, don't care default value
         for e in p.getiterator("executionTime"):
             chaine = e.get("time")
             if chaine is not None:
                 # 1;3,1 ==>  setPhaseDurationInitList([1]) && setPhaseDurationList([3,1]) 
-                (linit, lcyclo) = split_init_cyclo_durations(chaine)
+                (linit, lcyclo) = __split_init_cyclo_durations(chaine)
                 if isinstance(dataflow, SDF):
                     dataflow.set_task_duration(task_ref, int(lcyclo[0]))
                 if isinstance(dataflow, CSDF):
@@ -127,12 +142,12 @@ def parse_sdf3_actor_properties(elem, dataflow, task_ref):
 #  ...
 #  </actorProperties>
 # </sdfProperties>
-def parse_sdf3_sdf_properties(elem, dataflow):
+def __parse_sdf3_sdf_properties(elem, dataflow):
     for ap in elem.getiterator("actorProperties"):
         if ap.get("actor") is not None:
             dataflow.add_task(ap.get("actor"))
             task_ref = dataflow.get_task_by_name(ap.get("actor"))
-            parse_sdf3_actor_properties(ap, dataflow, task_ref)
+            __parse_sdf3_actor_properties(ap, dataflow, task_ref)
 
 
 # -- Sample -- 
@@ -140,7 +155,7 @@ def parse_sdf3_sdf_properties(elem, dataflow):
 # <port type='in' name='out_channel_2' rate='1;1:3,3'/> init;normal normal:seuil
 # <port type='out' name='in_channel_0' rate='3,5'/>
 # </actor>
-def parse_sdf3_actor(task, dataflow):
+def __parse_sdf3_actor(task, dataflow):
     taskname = task.get("name")
     task_ref = dataflow.get_task_by_name(taskname)
     for port in task.getiterator("port"):
@@ -156,7 +171,7 @@ def parse_sdf3_actor(task, dataflow):
         if port_type == "in":
             for channel in dataflow.get_arc_list(target=task_ref):
                 if dataflow.get_cons_port_name(channel) == port_name:
-                    ((r1, t1), (r2, t2)) = split_init_cyclo_rates(port_rate)
+                    ((r1, t1), (r2, t2)) = __split_init_cyclo_rates(port_rate)
                     if isinstance(dataflow, SDF):
                         dataflow.set_cons_rate(channel, r2[0])
                     if isinstance(dataflow, CSDF):
@@ -170,7 +185,7 @@ def parse_sdf3_actor(task, dataflow):
         if port_type == "out":
             for channel in dataflow.get_arc_list(source=task_ref):
                 if dataflow.get_prod_port_name(channel) == port_name:
-                    ((r1, t1), (r2, t2)) = split_init_cyclo_rates(port_rate)
+                    ((r1, t1), (r2, t2)) = __split_init_cyclo_rates(port_rate)
                     if isinstance(dataflow, SDF):
                         dataflow.set_prod_rate(channel, r2[0])
                     if isinstance(dataflow, CSDF):
@@ -186,7 +201,7 @@ def parse_sdf3_actor(task, dataflow):
 # <channel name='channel_0' srcActor='A' srcPort='in_channel_0'
 # dstActor='B' dstPort='out_channel_0' size='1' initialTokens='0'/>
 # </sdf>
-def parse_sdf3_sdf(elem, dataflow):
+def __parse_sdf3_sdf(elem, dataflow):
     # Check input value
     if elem.tag != "sdf":
         if elem.tag != "csdf":
@@ -212,7 +227,7 @@ def parse_sdf3_sdf(elem, dataflow):
 
     # Read rates from task list
     for task in elem.getiterator("actor"):
-        parse_sdf3_actor(task, dataflow)
+        __parse_sdf3_actor(task, dataflow)
 
 
 # -- Sample --  
@@ -222,7 +237,7 @@ def parse_sdf3_sdf(elem, dataflow):
 # <sdfProperties>
 # </sdfProperties>
 # </applicationGraph>
-def parse_sdf3_application_graph(elem, dataflow):
+def __parse_sdf3_application_graph(elem, dataflow):
     # Check input value
     if elem.tag != "applicationGraph":
         raise BaseException()
@@ -235,7 +250,7 @@ def parse_sdf3_application_graph(elem, dataflow):
     pdone = False
     for child in elem:
         if child.tag == "sdfProperties" or child.tag == "csdfProperties":
-            parse_sdf3_sdf_properties(child, dataflow)
+            __parse_sdf3_sdf_properties(child, dataflow)
             pdone = True
 
     if not pdone:
@@ -245,13 +260,13 @@ def parse_sdf3_application_graph(elem, dataflow):
     gdone = False
     for child in elem:
         if child.tag == "sdf":
-            parse_sdf3_sdf(child, dataflow)
+            __parse_sdf3_sdf(child, dataflow)
             gdone = True
         elif child.tag == "csdf":
-            parse_sdf3_sdf(child, dataflow)
+            __parse_sdf3_sdf(child, dataflow)
             gdone = True
         elif child.tag == "pcg":
-            parse_sdf3_sdf(child, dataflow)
+            __parse_sdf3_sdf(child, dataflow)
             gdone = True
 
     if not gdone:
@@ -266,7 +281,7 @@ def parse_sdf3_application_graph(elem, dataflow):
 # <applicationGraph name='Cyclic'>
 # </applicationGraph>
 # </sdf3>
-def parse_sdf3_node(root, name):
+def __parse_sdf3_node(root, name):
     # Check input value
     if root.tag != "sdf3":
         raise BaseException()
@@ -281,12 +296,12 @@ def parse_sdf3_node(root, name):
     else:
         raise ValueError
     for applicationGraph in root:
-        parse_sdf3_application_graph(applicationGraph, dataflow)
+        __parse_sdf3_application_graph(applicationGraph, dataflow)
 
     return dataflow
 
 
-def gen_sdf3_csdf_properties(dataflow):
+def __gen_sdf3_csdf_properties(dataflow):
     csdfp = ElementTree.Element("csdfProperties")
     for task in dataflow.get_task_list():
         exetime = ElementTree.Element("executionTime")
@@ -302,7 +317,7 @@ def gen_sdf3_csdf_properties(dataflow):
     return csdfp
 
 
-def gen_sdf3_sdf_properties(dataflow):
+def __gen_sdf3_sdf_properties(dataflow):
     sdfp = ElementTree.Element("sdfProperties")
     for task in dataflow.get_task_list():
         exetime = ElementTree.Element("executionTime")
@@ -319,7 +334,7 @@ def gen_sdf3_sdf_properties(dataflow):
 
 
 # <port type='in' name='out_channel_2' rate='6'/>
-def gen_sdf3_in_port(dataflow, arc):
+def __gen_sdf3_in_port(dataflow, arc):
     port = ElementTree.Element("port")
     port.set("type", "in")
     port.set("name", str(dataflow.get_cons_port_name(arc)))
@@ -328,7 +343,7 @@ def gen_sdf3_in_port(dataflow, arc):
 
 
 # <port type='out' name='out_channel_2' rate='6'/>
-def gen_sdf3_out_port(dataflow, arc):
+def __gen_sdf3_out_port(dataflow, arc):
     port = ElementTree.Element("port")
     port.set("type", "out")
     port.set("name", str(dataflow.get_prod_port_name(arc)))
@@ -336,7 +351,7 @@ def gen_sdf3_out_port(dataflow, arc):
     return port
 
 
-def gen_sdf3_csdf(dataflow):
+def __gen_sdf3_csdf(dataflow):
     csdf = ElementTree.Element("csdf")
     csdf.set("name", dataflow.get_name())
     csdf.set("type", str.lower(dataflow.get_dataflow_type()))
@@ -345,9 +360,9 @@ def gen_sdf3_csdf(dataflow):
         t.set("name", dataflow.get_task_name(task))
         t.set("type", "actor")
         for c in dataflow.get_arc_list(target=task):
-            t.append(gen_sdf3_in_port(dataflow, c))
+            t.append(__gen_sdf3_in_port(dataflow, c))
         for c in dataflow.get_arc_list(source=task):
-            t.append(gen_sdf3_out_port(dataflow, c))
+            t.append(__gen_sdf3_out_port(dataflow, c))
         csdf.append(t)
     # <channel name='channel_0' srcActor='A' srcPort='in_channel_0'
     # ... dstActor='B' dstPort='out_0' size='1' initialTokens='0'/>
@@ -364,7 +379,7 @@ def gen_sdf3_csdf(dataflow):
     return csdf
 
 
-def gen_sdf3_sdf(dataflow):
+def __gen_sdf3_sdf(dataflow):
     sdf = ElementTree.Element("sdf")
     sdf.set("name", dataflow.get_name())
     sdf.set("type", str.lower(dataflow.get_dataflow_type()))
@@ -373,9 +388,9 @@ def gen_sdf3_sdf(dataflow):
         t.set("name", dataflow.get_task_name(task))
         t.set("type", "actor")
         for c in dataflow.get_arc_list(target=task):
-            t.append(gen_sdf3_in_port(dataflow, c))
+            t.append(__gen_sdf3_in_port(dataflow, c))
         for c in dataflow.get_arc_list(source=task):
-            t.append(gen_sdf3_out_port(dataflow, c))
+            t.append(__gen_sdf3_out_port(dataflow, c))
         sdf.append(t)
     # <channel name='channel_0' srcActor='A' srcPort='in_channel_0'
     # ... dstActor='B' dstPort='out_0' size='1' initialTokens='0'/>
@@ -392,7 +407,7 @@ def gen_sdf3_sdf(dataflow):
     return sdf
 
 
-def gen_sdf3_node(dataflow):
+def __gen_sdf3_node(dataflow):
     root = ElementTree.Element("sdf3")
     if isinstance(dataflow, SDF):
         root.set("type", "sdf")
@@ -412,11 +427,11 @@ def gen_sdf3_node(dataflow):
     ag = ElementTree.Element("applicationGraph")
     ag.set("name", dataflow.get_name())
     if isinstance(dataflow, SDF):
-        ag.append(gen_sdf3_sdf(dataflow))
-        ag.append(gen_sdf3_sdf_properties(dataflow))
+        ag.append(__gen_sdf3_sdf(dataflow))
+        ag.append(__gen_sdf3_sdf_properties(dataflow))
     else:
-        ag.append(gen_sdf3_csdf(dataflow))
-        ag.append(gen_sdf3_csdf_properties(dataflow))
+        ag.append(__gen_sdf3_csdf(dataflow))
+        ag.append(__gen_sdf3_csdf_properties(dataflow))
     root.append(ag)
 
     return root
@@ -425,14 +440,14 @@ def gen_sdf3_node(dataflow):
 def read_sdf3_file(filename):
     xmltree = ElementTree.parse(filename)
     name = filename.split("/")[-1]
-    graph = parse_sdf3_node(xmltree.getroot(), name)
+    graph = __parse_sdf3_node(xmltree.getroot(), name)
     compute_rep_vect(graph)
     return graph
 
 
 def write_sdf3_file(dataflow, filename=None):
-    xmltree = gen_sdf3_node(dataflow)
-    indent(xmltree)
+    xmltree = __gen_sdf3_node(dataflow)
+    __indent(xmltree)
     w_file = sys.stdout
     if filename is not None:
         w_file = open(filename, "w")

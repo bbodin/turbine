@@ -20,9 +20,9 @@ def compute_initial_marking(dataflow, solver_str="Auto", solver_verbose=False, l
         return
 
     elif solver_str == "Auto":
-        if period is not None and period != 0:
+        if period is not None:
             solver = SolverSC1Kc(dataflow, float(period), solver_verbose, lp_filename)
-            logging.info("choose solver SC1")
+            logging.info("choose solver SC1 Kc")
         elif __cs2_row_count(dataflow) < __sc1_row_count(dataflow):
             solver = SolverSC2(dataflow, solver_verbose, lp_filename)
             logging.info("choose solver SC2")

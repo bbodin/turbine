@@ -1,5 +1,5 @@
 import logging
-from glpk import *
+from swiglpk import *
 
 
 class SolverSC1:

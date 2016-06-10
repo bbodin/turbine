@@ -80,8 +80,8 @@ def __generate_rates(dataflow, c_param):
         if zi == 0:
             logging.fatal("lcmValue" + str(lcm_value))
             logging.fatal("null rate when generating, this Exception should never occur...")
-            raise Exception("__generate_phase_lists",
-                            "null rate when generating, this Exception should never occur...")
+            raise RuntimeError("__generate_phase_lists",
+                               "null rate when generating, this Exception should never occur...")
 
         if dataflow.is_sdf:
             duration = randint(1, c_param.get_average_time() * 2 - 1)
@@ -105,15 +105,15 @@ def __generate_rates(dataflow, c_param):
                 if sum(dataflow.get_prod_rate_list(arc)) != zi:
                     logging.fatal("constrained_sum_sample_pos return wrong list, "
                                   "it's generally cause by too large number.")
-                    raise Exception("__generate_phase_lists constrained_sum_sample_pos return wrong list, "
-                                    "it's generally cause by too large number.")
+                    raise RuntimeError("__generate_phase_lists constrained_sum_sample_pos return wrong list, "
+                                       "it's generally cause by too large number.")
 
             for arc in dataflow.get_arc_list(target=task):
                 cons_list = constrained_sum_sample_pos(phase_count, zi)
                 dataflow.set_cons_rate_list(arc, cons_list)
                 if sum(dataflow.get_cons_rate_list(arc)) != zi:
-                    raise Exception("__generate_phase_lists constrained_sum_sample_pos return wrong list, "
-                                    "it's generally cause by too large number.")
+                    raise RuntimeError("__generate_phase_lists constrained_sum_sample_pos return wrong list, "
+                                       "it's generally cause by too large number.")
 
         if dataflow.get_task_count() > 1000 and k % 1000 == 0:
             logging.info(str(k) + "/" + str(dataflow.get_task_count()) + " tasks weigth generation complete.")

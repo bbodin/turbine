@@ -1,7 +1,7 @@
 from copy import copy
 import logging
 
-from glpk import *
+from swiglpk import *
 
 
 class SolverSC2:
@@ -35,8 +35,8 @@ class SolverSC2:
         glp_init_smcp(self.glpkParam)
         self.glpkParam.presolve = GLP_ON
         if not self.verbose:
-            self.glpkParam.msg_lev = GLP_MSG_ERR
-        self.glpkParam.meth = GLP_DUALP
+            self.glpkParam.msg_lev = 0
+        # self.glpkParam.meth = GLP_DUALP
         self.glpkParam.out_frq = 2000
 
     def __create_col(self):  # Add Col on prob

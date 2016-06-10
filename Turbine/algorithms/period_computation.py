@@ -4,7 +4,7 @@ Created on Jul 8, 2014
 from fractions import gcd
 import logging
 
-from glpk import *
+from swiglpk import *
 
 
 class ComputePeriod:

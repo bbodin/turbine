@@ -1,14 +1,15 @@
 
-Turbine is a Dataflow graph generator. 
+Turbine is a Dataflow graph generator. For any question or bug report please contact youen.lesparre@lip6.fr.
 It can generate SDFGs, CSDFGs and PCGs with initilization phases. All the graphs can be saved in the SDF3 XML format (a particular notation is considered for threshold and initilization phases).
 
 Features
 =======
 
- * Generate SDFG/CSDFG/PCG up to 10,000 actors (~10m for SDFG, ~2h for CSDFG/PCG).
+ * Generate live SDFG/CSDFG/PCG up to 10,000 actors in ~20s.
  * Normalize/denormalize dataflow graph.
- * Compute initial marking.
+ * Compute initial marking (under period constraint and with linear or mixed interger programming).
  * Compute symbolic execution of dataflow graphs.
+ * Compute period.
  * Generate .sdf3 xml files (see SDF3 generator)
  * Generate .tur files (10 times smaller than sdf3 files and easy to write by hand)
 
@@ -18,27 +19,13 @@ Installation
 Requirements
 -------
 
- * networkx-1.8.1
- * python-glpk-0.4.43
- * glpk 4.47 or 4.48 (constraint from python-glpk)
+ * networkx-1.11
+ * swiglpk (python-glpk-0.4.43 still work but is obsolete)
+ * GLPK in any version schould work, also, v4.58 work great (GLPK 4.47 or 4.48 if running with python-glpk).
 
 With Fedora 17+, you can install networkx by using `yum install networkx -y`.
-Instructions to install python-glpk can be found here http://en.wikibooks.org/wiki/GLPK/Python.
-glpk is available at http://ftp.gnu.org/gnu/glpk/.
-
-on UBUNTU
--------
-```
-apt-get install python-glpk python-networkx 
-```
-Special note for python-glpk with Fedora
--------
-
-With fedora there is no `pyversions` tool (required by `python-glpk`). You can fix it by adding the folowing line in the swig `Makefile` :
-
-```
-`pkg-config --cflags --libs python2`
-```
+Instructions to install swiglpk can be found here https://pypi.python.org/pypi/swiglpk.
+GLPK is available at http://ftp.gnu.org/gnu/glpk/.
 
 To test if the installation is ok run basic_test.py located on the root of turbine.
 Please, report any trouble at youen.lesparre@lip6.fr .
@@ -92,8 +79,6 @@ param.set_lp_filename(test.lp)
 
 generate(param)
 ```
-
-A `test.pl` file will be created in current directory.
 
 Several examples are avalaible in 'turbine/examples'.
 

@@ -12,8 +12,10 @@ def generate(dataflow_name="generated_graph", c_param=None, nx_graph=None):
     
     Parameters
     ----------
-    graphName : the name of the dataflow (default : generated_graph).
+    dataflow_name : the name of the dataflow (default : generated_graph).
     c_param : parameters of the generation.
+    nx_graph : if you want to generate a graph with random rates but with specific graph architecture
+    (like a random graph generate by NetworkX)
     """
     if c_param is None:
         c_param = Parameters()

@@ -46,9 +46,9 @@ def write_tur_file(dataflow, filename):
 def read_tur_file(filename):
     open_file = open(filename, "r")
     name, dataflow_type = __readline(open_file).replace("\n", "").split(" ")
-    if dataflow_type == "SDF":
+    if dataflow_type == "SDF" or dataflow_type == "SDFG":
         dataflow = SDF(name)
-    elif dataflow_type == "CSDF":
+    elif dataflow_type == "CSDF" or dataflow_type == "CSDFG":
         dataflow = CSDF(name)
     elif dataflow_type == "PCG":
         dataflow = PCG(name)
@@ -61,11 +61,11 @@ def read_tur_file(filename):
         dataflow.set_repetition_factor(task, int(repetition_factor))
         if ";" in str_duration:
             str_ini_duration, str_duration = str_duration.split(";")
-            ini_duration_list = [int(i) for i in str_ini_duration.split(",")]
+            ini_duration_list = [float(i) for i in str_ini_duration.split(",")]
             dataflow.set_ini_phase_count(task, len(ini_duration_list))
             dataflow.set_ini_phase_duration_list(task, ini_duration_list)
 
-        duration_list = [int(float(i)) for i in str_duration.split(",")]
+        duration_list = [float(i) for i in str_duration.split(",")]
         if isinstance(dataflow, SDF):
             dataflow.set_task_duration(task, duration_list[0])
         if isinstance(dataflow, CSDF):

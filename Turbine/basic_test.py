@@ -34,7 +34,7 @@ print ""
 print "Acyclic SDF generation",
 c_param = Parameters()
 c_param.set_logging_level(logging.CRITICAL)
-c_param.set_multi_graph(True)
+c_param.set_multi_arc(True)
 c_param.set_reentrant(True)
 c_param.set_acyclic(True)
 try_function(generate, ("Test_of_SDFG", c_param))
@@ -78,7 +78,7 @@ print ""
 print "Acyclic SDF generation",
 c_param.set_dataflow_type("CSDF")
 c_param.set_logging_level(logging.CRITICAL)
-c_param.set_multi_graph(True)
+c_param.set_multi_arc(True)
 c_param.set_reentrant(True)
 c_param.set_acyclic(True)
 try_function(generate, ("Test_of_CSDFG", c_param))
@@ -121,7 +121,7 @@ print "Acyclic PCG generation",
 c_param.set_dataflow_type("PCG")
 c_param.set_logging_level(logging.CRITICAL)
 c_param.set_acyclic(True)
-c_param.set_multi_graph(True)
+c_param.set_multi_arc(True)
 c_param.set_reentrant(True)
 try_function(generate, ("Test_of_PCG", c_param))
 print "Cyclic PCG generation",
