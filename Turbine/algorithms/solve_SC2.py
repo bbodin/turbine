@@ -1,7 +1,10 @@
 from copy import copy
 import logging
 
-from swiglpk import *
+try:
+    from swiglpk import *
+except ImportError:
+    from glpk import *
 
 
 class SolverSC2:

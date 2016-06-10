@@ -4,7 +4,10 @@ Created on Jul 8, 2014
 from fractions import gcd
 import logging
 
-from swiglpk import *
+try:
+    from swiglpk import *
+except ImportError:
+    from glpk import *
 
 
 class ComputePeriod:
