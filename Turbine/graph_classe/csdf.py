@@ -150,6 +150,7 @@ class CSDF(Dataflow):
         target_pc = self.get_phase_count(target)
         self.set_cons_rate_list(arc, [1] * target_pc)
         self.set_prod_rate_list(arc, [1] * source_pc)
+        self.__calc_gcd(arc)
         return arc
 
     ########################################################################
@@ -198,9 +199,9 @@ class CSDF(Dataflow):
             (default name=lowest unused integer).
         """
         try:
-            a = reduce(gcd, self.get_cons_rate_list(arc))
-            b = reduce(gcd, self.get_prod_rate_list(arc))
-            gcd_v = gcd(a, b)
+            gcd_v = self.get_cons_rate_list(arc)[0]
+            for v in self.get_cons_rate_list(arc):
+                gcd_v = gcd(gcd_v, v)
             self._set_arc_attribute(arc, gcd_v, self._CONST_ARC_GCD)
         except KeyError:
             pass
@@ -269,6 +270,16 @@ class CSDF(Dataflow):
             source_w = sum(self.get_prod_rate_list(arc)) * self.get_repetition_factor(self.get_source(arc))
             target_w = sum(self.get_cons_rate_list(arc)) * self.get_repetition_factor(self.get_target(arc))
             if source_w != target_w:
+                print arc, source_w, target_w
+                print "source", sum(self.get_prod_rate_list(arc)), self.get_repetition_factor(self.get_source(arc))
+                print "target", sum(self.get_cons_rate_list(arc)), self.get_repetition_factor(self.get_target(arc))
+                arc = (41, 0, 0)
+                source_w = sum(self.get_prod_rate_list(arc)) * self.get_repetition_factor(self.get_source(arc))
+                target_w = sum(self.get_cons_rate_list(arc)) * self.get_repetition_factor(self.get_target(arc))
+                print arc, source_w, target_w
+                print "source", sum(self.get_prod_rate_list(arc)), self.get_repetition_factor(self.get_source(arc))
+                print "target", sum(self.get_cons_rate_list(arc)), self.get_repetition_factor(self.get_target(arc))
+
                 return False
         return True
 

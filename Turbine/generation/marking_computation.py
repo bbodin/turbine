@@ -43,9 +43,13 @@ def compute_initial_marking(dataflow, solver_str="Auto", solver_verbose=False, l
         solver = SolveSC1GuMIP(dataflow, solver_verbose, lp_filename)
         if period is not None:
             solver = SolveSC1GuMIPKc(dataflow, period, solver_verbose, lp_filename)
-
+    elif solver_str == "SC2_MIP":
+        from Turbine.algorithms.solve_SC2_Gurobi_MIP import SolveSC2GuMIP
+        solver = SolveSC2GuMIP(dataflow, solver_verbose, lp_filename)
+        if period is not None:
+            raise RuntimeError("SC2_MIP with period constraints is not implemented yet.")
     else:
-        raise Exception("Wrong solver argument: no solver called")
+        raise RuntimeError("Wrong solver argument: no solver called.")
 
     logging.info("Generating initial marking")
     solver.compute_initial_marking()

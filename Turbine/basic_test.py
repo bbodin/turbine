@@ -13,7 +13,7 @@ def try_function(function, args):
     except:
         print "FAIL !"
     else:
-        print "DONE !"
+        print "done !"
         return ret
 
 
@@ -23,7 +23,7 @@ def try_property(prop):
     except:
         print "FAIL !"
     else:
-        print "DONE !"
+        print "done !"
         return ret
 
 
@@ -66,6 +66,8 @@ print "SC1_k on a SDF",
 try_function(SDF.compute_initial_marking, ("SC1", False, None, 1))
 print "SC1_MIP on a SDF",
 try_function(SDF.compute_initial_marking, ("SC1_MIP", False, None, None))
+print "SC2_MIP on a SDF",
+try_function(SDF.compute_initial_marking, ("SC2_MIP", False, None, None))
 print "SC1_MIP_k on a SDF",
 try_function(SDF.compute_initial_marking, ("SC1_MIP", False, None, 1))
 print "Computing period on a SDF",
@@ -110,6 +112,8 @@ print "SC1_k on a CSDF",
 try_function(CSDF.compute_initial_marking, ("SC1", False, None, 1))
 print "SC1_MIP on a CSDF",
 try_function(CSDF.compute_initial_marking, ("SC1_MIP", False, None, None))
+print "SC2_MIP on a CSDF",
+try_function(CSDF.compute_initial_marking, ("SC2_MIP", False, None, None))
 print "SC1_MIP_k on a CSDF",
 try_function(CSDF.compute_initial_marking, ("SC1_MIP", False, None, 1))
 print "Compute symbolic execution on a CSDF",
@@ -152,6 +156,8 @@ print "SC1_k on a PCG",
 try_function(PCG.compute_initial_marking, ("SC1", False, None, 1))
 print "SC1_MIP on a PCG",
 try_function(PCG.compute_initial_marking, ("SC1_MIP", False, None, None))
+print "SC2_MIP on a PCG",
+try_function(PCG.compute_initial_marking, ("SC2_MIP", False, None, None))
 print "SC1_MIP_k on a PCG",
 try_function(PCG.compute_initial_marking, ("SC1_MIP", False, None, 1))
 print "Compute symbolic execution on a PCG",

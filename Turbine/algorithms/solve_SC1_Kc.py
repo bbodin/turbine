@@ -7,11 +7,9 @@ except ImportError:
 
 
 class SolverSC1Kc:
-    """Solve the initial marking under maximal period constraint. The period constraint is a upper bound.
+    """Solve the initial marking under maximal period constraint. The period constraint is an upper bound.
     
     Small value of the period may not work.
-    
-    This algorithm work only for SDFG !
     """
 
     def __init__(self, dataflow, period, verbose, lp_filename):

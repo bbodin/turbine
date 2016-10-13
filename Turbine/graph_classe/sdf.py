@@ -1,5 +1,4 @@
 from fractions import gcd
-
 from Turbine.graph_classe.dataflow import Dataflow
 from Turbine.algorithms.period_computation import ComputePeriod
 
@@ -9,11 +8,11 @@ class SDF(Dataflow):
     #                           CONSTANT                                   #
     ########################################################################
     # -------------------------Task----------------------------------------#
-    __CONST_TASK_DURATION = "tDur"
+    __CONST_TASK_DURATION = "tdur"
 
     # -------------------------Arc-----------------------------------------#
-    __CONST_ARC_CONS_RATE = "cL"
-    __CONST_ARC_PROD_RATE = "pL"
+    __CONST_ARC_CONS_RATE = "consw"
+    __CONST_ARC_PROD_RATE = "prodw"
 
     def __init__(self, name=""):
         """

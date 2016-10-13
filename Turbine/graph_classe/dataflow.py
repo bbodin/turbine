@@ -74,7 +74,6 @@ class Dataflow(object):
         d = Dot(self)
         d.write_pdf(name)
 
-
     ########################################################################
     #                           add/modify tasks                           #
     ########################################################################
@@ -360,7 +359,7 @@ class Dataflow(object):
 
     def get_initial_marking(self, arc):
         """:return : the initial marking of an arc.
-        .=
+
         Parameters
         ----------
         arc : tuple (source, destination) or (source, destination, name)
@@ -377,6 +376,16 @@ class Dataflow(object):
             (default name=lowest unused integer).
         """
         return self._get_arc_attribute(arc, self._CONST_ARC_TOKEN_SIZE)
+
+    def get_initial_marking_size(self, arc):
+        """:return : the size of the arc in memory.
+
+        Parameters
+        ----------
+        arc : tuple (source, destination) or (source, destination, name)
+            (default name=lowest unused integer).
+        """
+        return self.get_initial_marking(arc) * self.get_token_size(arc)
 
     def get_cons_port_name(self, arc):
         """:return : the consumption port name of an arc. This is used only for sdf3 files .
@@ -536,6 +545,13 @@ class Dataflow(object):
             im_sum += self.get_initial_marking(arc)
         return im_sum
 
+    def get_tot_size(self):
+        sum_size = 0
+        for arc in self.get_arc_list():
+            sum_size += self.get_initial_marking_size(arc)
+        return sum_size
+
+
     ########################################################################
     #                        Graph Transformations                         #
     ########################################################################
@@ -558,8 +574,8 @@ class Dataflow(object):
     def compute_repetition_vector(self):
         return compute_rep_vect(self)
 
-    def normalized(self):
-        return normalized_dataflow(self)
+    def normalized(self, vect=None):
+        return normalized_dataflow(self, coef_vector=vect)
 
     def un_normalized(self, coef_vector=None):
         return un_normalized_dataflow(self, coef_vector=coef_vector)
@@ -623,8 +639,7 @@ class Dataflow(object):
     @property
     def is_dead_lock(self):
         """
-
-        :return: True if the dataflow is live
+        :return: True if the dataflow is dead lock
         """
         se = SymbolicExe(self)
         if se.execute() == 0:

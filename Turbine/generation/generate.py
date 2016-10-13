@@ -30,6 +30,7 @@ def generate(dataflow_name="generated_graph", c_param=None, nx_graph=None):
                             solver_str=c_param.get_solver(),
                             solver_verbose=c_param.is_solver_verbose(),
                             lp_filename=c_param.get_lp_filenam())
-
+    if not c_param.is_normalized():
+        dataflow.un_normalized()
     logging.info("Generating done : " + str(time() - start) + "s")
     return dataflow

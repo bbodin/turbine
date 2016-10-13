@@ -36,7 +36,6 @@ class SolverSC1:
         # GLPK parameters:
         self.glpk_param = glp_smcp()
         glp_init_smcp(self.glpk_param)  # Do it before modify parameters
-
         self.glpk_param.presolve = GLP_ON
         self.glpk_param.msg_lev = GLP_MSG_ALL
         if not self.verbose:
@@ -161,7 +160,6 @@ class SolverSC1:
 
                         str_v1 = str(source) + "/" + str(source_phase)
                         str_v2 = str(target) + "/" + str(target_phase)
-
                         self.__add_row(row, str_v1, str_v2, arc, w)
                         row += 1
                         # END FILL ROW
@@ -222,7 +220,7 @@ class SolverSC1:
     # Add a variable lamda
     def __add_col_v(self, col, name):
         glp_set_col_name(self.prob, col, name)
-        glp_set_col_bnds(self.prob, col, GLP_FR, 0, 0)
+        glp_set_col_bnds(self.prob, col, GLP_LO, 0, 0)
         glp_set_obj_coef(self.prob, col, 0.0)
         self.colV[name] = col
 
@@ -243,23 +241,22 @@ class SolverSC1:
 
     # Add a constraint: lambda1 - lambda2 + M0 > W1
     def __add_row(self, row, str_v1, str_v2, arc, w):
-        if self.dataflow.get_source(arc) != self.dataflow.get_target(arc):
-            self.var_row[self.k] = row
-            self.var_col[self.k] = self.colV[str_v1]
-            self.var_coef[self.k] = 1.0
-            self.k += 1
+        self.var_row[self.k] = row
+        self.var_col[self.k] = self.colV[str_v1]
+        self.var_coef[self.k] = 1.0
+        self.k += 1
 
-            self.var_row[self.k] = row
-            self.var_col[self.k] = self.colV[str_v2]
-            self.var_coef[self.k] = -1.0
-            self.k += 1
+        self.var_row[self.k] = row
+        self.var_col[self.k] = self.colV[str_v2]
+        self.var_coef[self.k] = -1.0
+        self.k += 1
 
         self.var_row[self.k] = row
         self.var_col[self.k] = self.col_m0[arc]
         self.var_coef[self.k] = 1.0
         self.k += 1
 
-        glp_set_row_bnds(self.prob, row, GLP_LO, w + 0.0000001, 0.0)  # W1+1 cause there is no strict bound with GLPK
+        glp_set_row_bnds(self.prob, row, GLP_LO, w + 0.001, 0.0)  # W1+1 cause there is no strict bound with GLPK
         glp_set_row_name(self.prob, row, "r_" + str(row))
 
     # Add a constraint: FM0*step = M0

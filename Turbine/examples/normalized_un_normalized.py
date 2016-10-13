@@ -11,6 +11,7 @@ c_param = Parameters()
 c_param.set_dataflow_type("SDF")
 c_param.set_min_task_degree(1)
 c_param.set_max_task_degree(5)
+c_param.set_normalized(False)
 c_param.set_nb_task(10)
 
 print "###### Generate dataflow ############"

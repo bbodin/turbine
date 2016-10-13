@@ -3,12 +3,23 @@ import time
 
 
 class SymbolicExe:
+    """
+    This class execute the As Soon As Possible Schedule (ASAP) to detect dead-lock.
+    It also return the schedule (dict composed of list of start time for each task).
+    """
+
     def __init__(self, dataflow):
-        self.dataflow = dataflow
-        self.start_time = {}
-        self.time_tick = 0
-        self.currently_executed = []
-        self.tick_left = {}
+        # Max ratio between Rt execution between two task for the transient phase.
+        # This is for detecting dead lock when only a single part of the graph is executed.
+        # If only one task is not executed once on another is executed self.__RT_MAX_RATIO.Rt time
+        # (Rt is its the repetition factor) then a dead lock is deduced.
+        self.__RT_MAX_RATIO = 100000000
+
+        self.dataflow = dataflow  # The dataflow
+        self.start_time = {}  # The start time of tasks of the asap scheduling
+        self.time_tick = 0  # The current time (start at 0)
+        self.currently_executed = []  # True if the task at the rank t is executed false otherwise
+        self.tick_left = {}  # If a task is executed this is the time left until it end its execution
 
     def get_start_time(self, nb_ite=1):
         return self.execute(get_start_time=True, nb_ite=nb_ite)
@@ -16,6 +27,10 @@ class SymbolicExe:
     # Execute the symbolic execution until the number of iteration reach self.ite
     def execute(self, get_start_time=False, nb_ite=1):
         self.__raz()
+        # First we test case of obvious dead lock
+        if self.dataflow.is_cyclic and self.dataflow.get_tot_initial_marking() == 0:
+            return -1
+
         # start time of tasks/phase : (key = task, [start_time1, start_time2,...]) for SDF
         #                             (key = (task, phase), [start_time1, start_time2,...]) for CSDF or PCG
         num_task_exe = [0] * self.dataflow.get_task_count()  # execution number of the task during current step
@@ -28,8 +43,19 @@ class SymbolicExe:
             num_task_exe[task] = 0
         # ~ print "PHASE ONE"
         while not terminate:
+            min_rt_exe = num_task_exe[0] / self.dataflow.get_repetition_factor(0)
+            max_rt_exe = num_task_exe[0] / self.dataflow.get_repetition_factor(0)
             for task in self.dataflow.get_task_list():  # zero executed task
                 executed_task[task] = False
+                min_rt_exe = min(min_rt_exe, int(num_task_exe[task] / self.dataflow.get_repetition_factor(task)))
+                max_rt_exe = max(max_rt_exe, int(num_task_exe[task] / self.dataflow.get_repetition_factor(task)))
+            # cf the comment on self.__RT_MAX_RATIO to understand what's going on here.
+
+            if min_rt_exe == 0:
+                min_rt_exe = 1
+            if max_rt_exe / min_rt_exe > self.__RT_MAX_RATIO:
+                logging.info("Infinite loop detected, some part of the graph is dead lock !")
+                return -1
             # 1 - Choose which task can be execute
             task_execute = len(self.currently_executed)
             logging.debug("iteration: " + str(i))
@@ -44,7 +70,7 @@ class SymbolicExe:
                         phase_count = float(self.dataflow.get_phase_count(task))
 
                     rep_fact = float(self.dataflow.get_repetition_factor(task))
-                    if step_two and float(num_task_exe[task]) / phase_count == rep_fact*nb_ite:
+                    if step_two and float(num_task_exe[task]) / phase_count == rep_fact * nb_ite:
                         # If the task has been executed enought then don't execute it
                         executed_task[task] = False
                         task_execute -= 1
@@ -53,6 +79,8 @@ class SymbolicExe:
                         for arc in self.dataflow.get_arc_list(target=task):
                             logging.debug("\tInput arc: " + str(arc) + " M0=" + str(self.M0[arc]))
                     task_execute += 1
+
+            # print task_execute
             # 2 - Execute tasks selected
             for task in self.dataflow.get_task_list():
                 if executed_task[task]:  # If the task is selected
@@ -68,17 +96,23 @@ class SymbolicExe:
                     self.currently_executed.append(task)
                     self.tick_left[task] = self.__get_duration(task)
 
-            increment = min(self.tick_left.items(), key=lambda x: x[1])[1]
+            # This part compute the amount of time tick to remove to every current execution.
+            increment = 0
+            # Compute the minimum time tick increment for the execution.
+            if self.tick_left:
+                increment = min(self.tick_left.items(), key=lambda x: x[1])[1]
+            # Temp list to del task with time tick left at 0
             del_temp = []
             for task in self.currently_executed:
-                self.tick_left[task] -= increment
-                if self.tick_left[task] == 0:
+                self.tick_left[task] -= increment  # Remove the time tick of the time tick left until the task exe end.
+                if self.tick_left[task] == 0:  # Time tick down to zero, the execution of this task end here.
                     self.__task_end_exe(task)
                     del_temp.append(task)
+            # Del task with time tick left at 0
             for task in del_temp:
                 del self.tick_left[task]
                 self.currently_executed.remove(task)
-            self.time_tick += increment
+            self.time_tick += increment  # Increment the total time tick
 
             # Should we go to step Two ?
             if not step_two:
@@ -117,9 +151,8 @@ class SymbolicExe:
 
             # If nothing append the initial marking is wrong:-(
             if task_execute == 0:
-                logging.info("No task executed:-/, iteration: " + str(i))
-                logging.info("Arcs exe: " + str(self.arcExe))
-                logging.debug("number of exe: " + str(num_task_exe))
+                logging.debug("No task executed:-/, iteration: " + str(i) + "Arcs exe: " + str(
+                    self.arcExe) + "number of exe: " + str(num_task_exe))
                 return -1
             i += 1
         fin = time.time()
@@ -128,9 +161,9 @@ class SymbolicExe:
             return self.start_time
         return 0  # Exe successful
 
-    # Used when __init__ is called
-    # Initialized preload and phases
-    # Phases are negative when the graph have initialized phases.
+    # Use at the beginning of every execution.
+    # Initialized preload and phases.
+    # Phases are negative when the graph has initialized phases.
     def __raz(self):
         self.arcExe = 0
         self.time_tick = 0
@@ -223,17 +256,6 @@ class SymbolicExe:
         else:
             return self.__get_token_del(in_arc)
         return data_need
-
-    # def __get_start_time(self, task):
-    #     t_start_time = 0
-    #     if len(self.start_time[task]) != 0:
-    #         t_start_time = max(self.start_time[task]) + self.__get_duration(task)
-    #     for arc in self.dataflow.get_arc_list(target=task):
-    #         source = self.dataflow.get_source(arc)
-    #         if self.M0[arc] - self.__get_token_created(arc) < self.__get_token_need(arc):
-    #             if len(self.start_time[source]) != 0:
-    #                 t_start_time = max(t_start_time, max(self.start_time[source]) + self.__get_duration(source))
-    #     return t_start_time
 
     def __get_duration(self, task):
         if self.dataflow.is_sdf:

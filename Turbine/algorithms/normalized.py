@@ -1,12 +1,10 @@
 from fractions import Fraction
 from math import ceil
-
 from numpy.random.mtrand import randint
-
 from Turbine.calc.lcm import lcm
 
 
-def normalized_dataflow(dataflow):
+def normalized_dataflow(dataflow, coef_vector=None):
     """Normalize a dataflow and return the coefficient vector to un-normalized it.
 
     Return
@@ -14,18 +12,18 @@ def normalized_dataflow(dataflow):
     :return the un-normalize graph.
     """
     if not dataflow.is_consistent:
-        raise Exception("Dataflow must be consistent to be normalized")
+        raise RuntimeError("Dataflow must be consistent to be normalized")
     if dataflow.is_normalized:
-        return dataflow
+        return
 
-    coef_vector = get_normalized_vector(dataflow)
+    if coef_vector is None:
+        coef_vector = get_normalized_vector(dataflow)
 
     for arc in dataflow.get_arc_list():
         multiply_arc(dataflow, arc, coef_vector[arc])
 
     for arc in dataflow.get_arc_list():
         coef_vector[arc] = Fraction(numerator=1, denominator=coef_vector[arc])
-
     return coef_vector
 
 

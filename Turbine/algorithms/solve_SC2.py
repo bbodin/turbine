@@ -28,19 +28,22 @@ class SolverSC2:
         return self.Z  # Return the total amount find by the solver
 
     def __init_prob(self):  # Modify parameters
+        if not self.dataflow.is_normalized:
+            raise RuntimeError("Dataflow must be normalized !")
         logging.info("Generating problem...")
         self.prob = glp_create_prob()
         glp_set_prob_name(self.prob, "min_preload")
         glp_set_obj_dir(self.prob, GLP_MIN)
 
         # GLPK parameters:
-        self.glpkParam = glp_smcp()
-        glp_init_smcp(self.glpkParam)
-        self.glpkParam.presolve = GLP_ON
+        self.glpk_param = glp_smcp()
+        glp_init_smcp(self.glpk_param)
+        self.glpk_param.presolve = GLP_ON
+        self.glpk_param.msg_lev = GLP_MSG_ALL
         if not self.verbose:
-            self.glpkParam.msg_lev = 0
-        # self.glpkParam.meth = GLP_DUALP
-        self.glpkParam.out_frq = 2000
+            self.glpk_param.msg_lev = 0
+        # self.glpk_param.meth = GLP_DUALP
+        self.glpk_param.out_frq = 2000
 
     def __create_col(self):  # Add Col on prob
         # Counting column
@@ -108,16 +111,16 @@ class SolverSC2:
         for task in self.dataflow.get_task_list():
             for arc_in in self.dataflow.get_arc_list(target=task):
                 if not self.dataflow.is_arc_reentrant(arc_in):
-                    step = self.dataflow.get_gcd(arc_in)
                     for arc_out in self.dataflow.get_arc_list(source=task):
+                        step = self.dataflow.get_gcd(arc_out)
                         if not self.dataflow.is_arc_reentrant(arc_out):
                             max_v = self.__get_max(arc_in, arc_out)
 
-                            str_v1 = "v" + str(arc_in)
-                            str_v2 = "v" + str(arc_out)
+                            v_in = "v" + str(arc_in)
+                            v_out = "v" + str(arc_out)
 
                             w = max_v - step
-                            self.__add_row(row, str_v1, str_v2, arc_in, w)
+                            self.__add_row(row, v_in, v_out, arc_out, w)
                             row += 1
                             # END FILL ROW
 
@@ -129,7 +132,7 @@ class SolverSC2:
             logging.info("Writing problem: " + str(problem_location))
 
         logging.info("solving problem ...")
-        ret = str(glp_simplex(self.prob, self.glpkParam))
+        ret = str(glp_simplex(self.prob, self.glpk_param))
         logging.info("Solveur return: " + ret)
 
         self.Z = glp_get_obj_val(self.prob)
@@ -142,14 +145,26 @@ class SolverSC2:
                 buf = glp_get_col_prim(self.prob, self.col_m0[arc])
                 fm0 = glp_get_col_prim(self.prob, self.col_fm0[arc])
                 step = self.dataflow.get_gcd(arc)
-
-                if fm0 % 1 == 0:
+                if fm0 % 1.0 == 0.0:
                     self.dataflow.set_initial_marking(arc, int(buf))
                     buf_rev_tot += int(buf)
                 else:
                     opt_buffer = False
                     self.dataflow.set_initial_marking(arc, int((fm0 + 1) * step))
                     buf_rev_tot += int(fm0 + 1) * step
+
+        # for task in self.dataflow.get_task_list():
+        #     for arc_in in self.dataflow.get_arc_list(target=task):
+        #         if not self.dataflow.is_arc_reentrant(arc_in):
+        #             for arc_out in self.dataflow.get_arc_list(source=task):
+        #                 step = self.dataflow.get_gcd(arc_out)
+        #                 if not self.dataflow.is_arc_reentrant(arc_out):
+        #                     max_v = self.__get_max(arc_in, arc_out)
+        #                     str_v1 = "v" + str(arc_in)
+        #                     str_v2 = "v" + str(arc_out)
+        #                     v_v1 = glp_get_col_prim(self.prob, self.colv[str_v1])
+        #                     v_v2 = glp_get_col_prim(self.prob, self.colv[str_v2])
+        #                     print v_v1, v_v2, self.dataflow.get_initial_marking(arc_out), max_v-step
 
         logging.info("SC2 Mem tot: " + str(self.Z) + " REV: " + str(buf_rev_tot))
         if opt_buffer:
@@ -159,14 +174,14 @@ class SolverSC2:
 
     # Add a variable lamda
     def __add_col_v(self, col, name):
-        glp_set_col_name(self.prob, col, name)
+        glp_set_col_name(self.prob, col, name.replace(' ', ''))
         glp_set_col_bnds(self.prob, col, GLP_FR, 0.0, 0.0)
         glp_set_obj_coef(self.prob, col, 0.0)
         self.colv[name] = col
 
     # Add a variable M0
     def __add_col_m0(self, col, name, arc):
-        glp_set_col_name(self.prob, col, name)
+        glp_set_col_name(self.prob, col, name.replace(' ', ''))
         glp_set_col_bnds(self.prob, col, GLP_LO, 0.0, 0.0)
         glp_set_obj_coef(self.prob, col, 1.0)
         self.col_m0[arc] = col
@@ -174,30 +189,28 @@ class SolverSC2:
     # Add a variable FM0
     def __add_col_fm0(self, col, name, arc):
         glp_set_col_kind(self.prob, col, GLP_CV)
-        glp_set_col_name(self.prob, col, name)
+        glp_set_col_name(self.prob, col, name.replace(' ', ''))
         glp_set_col_bnds(self.prob, col, GLP_LO, 0, 0)
-        glp_set_obj_coef(self.prob, col, 0.0)
         self.col_fm0[arc] = col
 
     # Add a constraint: lambda1 - lambda2 + M0 > W1
-    def __add_row(self, row, str_v1, str_v2, arc, w):
-        if str_v1 != str_v2:
-            self.var_row[self.k] = row
-            self.var_col[self.k] = self.colv[str_v1]
-            self.var_coef[self.k] = 1.0
-            self.k += 1
-
-            self.var_row[self.k] = row
-            self.var_col[self.k] = self.colv[str_v2]
-            self.var_coef[self.k] = -1.0
-            self.k += 1
-
+    def __add_row(self, row, v_in, v_out, arc_out, w):
         self.var_row[self.k] = row
-        self.var_col[self.k] = self.col_m0[arc]
+        self.var_col[self.k] = self.colv[v_out]
         self.var_coef[self.k] = 1.0
         self.k += 1
 
-        glp_set_row_bnds(self.prob, row, GLP_LO, w + 0.00001, 0.0)  # W2+1 cause there is no strict bound with GLPK
+        self.var_row[self.k] = row
+        self.var_col[self.k] = self.colv[v_in]
+        self.var_coef[self.k] = -1.0
+        self.k += 1
+
+        self.var_row[self.k] = row
+        self.var_col[self.k] = self.col_m0[arc_out]
+        self.var_coef[self.k] = 1.0
+        self.k += 1
+
+        glp_set_row_bnds(self.prob, row, GLP_LO, w + 1, 0.0)  # W2+1 cause there is no strict bound with GLPK
         glp_set_row_name(self.prob, row, "r_" + str(row))
 
     # Add a constraint: FM0*step = M0

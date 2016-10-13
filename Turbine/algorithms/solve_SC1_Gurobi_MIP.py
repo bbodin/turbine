@@ -37,7 +37,7 @@ class SolveSC1GuMIP:
 
     def __init_prob(self):  # Modify parameters
         logging.info("Generating initial marking problem")
-        self.prob = Model("SC1")
+        self.prob = Model("SC1_MIP")
 
         # Gurobi parameters:
         if not self.verbose:
@@ -46,11 +46,10 @@ class SolveSC1GuMIP:
                 os.remove("gurobi.log")
             except OSError:
                 pass
-        self.prob.params.Threads = 4
+        self.prob.params.Threads = 2
+        self.prob.params.intfeastol = 0.000001
 
     def __create_col(self):  # Add Col on prob
-        # Counting column
-
         # Create column bds (M0)
         for arc in self.dataflow.get_arc_list():
             self.__add_col_m0(arc)
@@ -140,7 +139,7 @@ class SolveSC1GuMIP:
             if not self.dataflow.is_arc_reentrant(arc):
                 self.dataflow.set_initial_marking(arc, int(self.col_m0[arc].x))
 
-        logging.info("SC1 Mem tot (no reentrant): " + str(self.Z))
+        logging.info("SC1 MIP Mem tot (no reentrant): " + str(self.Z))
 
     # Add a variable lamda
     def __add_col_v(self, name):
@@ -165,14 +164,13 @@ class SolveSC1GuMIP:
             expr -= self.col_v[str_v2]
         expr += self.col_m0[arc]
 
-        self.prob.addConstr(expr, GRB.GREATER_EQUAL, w + 1)
+        self.prob.addConstr(expr, GRB.GREATER_EQUAL, w + 0.00001)
 
     # Add a constraint: FM0*step = M0
     def __add_frow(self, arc, step):
         expr = LinExpr()
         expr += self.col_fm0[arc]*float(step)
         expr -= self.col_m0[arc]
-
         self.prob.addConstr(expr, GRB.EQUAL, 0)
 
     def __get_range_phases(self, task):
