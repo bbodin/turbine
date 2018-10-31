@@ -30,6 +30,11 @@ GLPK is available at http://ftp.gnu.org/gnu/glpk/.
 To test if the installation is ok run basic_test.py located on the root of turbine.
 Please, report any trouble at youen.lesparre@lip6.fr .
 
+Update note for Fedora 28, the two following command can help to prepare the system for Turbine:
+
+ * yum install python2-networkx.noarch glpk python2-pydot
+ * pip install swiglpk
+
 Usage
 =======
 
