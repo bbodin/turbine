@@ -58,9 +58,10 @@ class Dot(object):
         self._dotGraph.write_jpeg(name + '.jpeg')
 
 
-file_path_bs = "simpl_BlackScholes.tur"
-# file_path_jpeg = "../../experimentations/indus/JPEG2000.tur"
-dataflow = read_tur_file(file_path_bs)
-# dataflow = get_csdf_into_sdf(dataflow)
-d = Dot(dataflow)
-d.write_pdf("test")
+if __name__ == "__main__":
+    file_path_bs = "simpl_BlackScholes.tur"
+    # file_path_jpeg = "../../experimentations/indus/JPEG2000.tur"
+    dataflow = read_tur_file(file_path_bs)
+    # dataflow = get_csdf_into_sdf(dataflow)
+    d = Dot(dataflow)
+    d.write_pdf("test")
