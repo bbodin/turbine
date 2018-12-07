@@ -1,5 +1,5 @@
 
-Turbine is a Dataflow graph generator. For any question or bug report please contact youen.lesparre@lip6.fr.
+Turbine is a Dataflow graph generator. For any question or bug report please contact y.lesparre@gmail.com.
 It can generate SDFGs, CSDFGs and PCGs with initilization phases. All the graphs can be saved in the SDF3 XML format (a particular notation is considered for threshold and initilization phases).
 
 Features
@@ -19,7 +19,8 @@ Installation
 Requirements
 -------
 
- * networkx-1.11
+ * python 2.7
+ * networkx-1.11 (does not work with networkx 2.0)
  * swiglpk (python-glpk-0.4.43 still work but is obsolete)
  * GLPK in any version schould work, also, v4.58 work great (GLPK 4.47 or 4.48 if running with python-glpk).
 
